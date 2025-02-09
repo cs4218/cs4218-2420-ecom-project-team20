@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1739112676984" clover="3.2.0">
-  <project timestamp="1739112676984" name="All files">
+<coverage generated="1739113451127" clover="3.2.0">
+  <project timestamp="1739113451127" name="All files">
     <metrics statements="262" coveredstatements="18" conditionals="82" coveredconditionals="7" methods="30" coveredmethods="1" elements="374" coveredelements="26" complexity="0" loc="262" ncloc="262" packages="1" files="3" classes="3"/>
     <file name="authController.js" path="/Users/prabhat/Documents/CS4218/controllers/authController.js">
       <metrics statements="93" coveredstatements="18" conditionals="46" coveredconditionals="7" methods="8" coveredmethods="1"/>
