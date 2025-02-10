@@ -61,7 +61,8 @@ describe("Register Controller Test", () => {
     await registerController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(userModel.create).not.toHaveBeenCalled();
+    expect(userModel).not.toHaveBeenCalled();
+    expect(userModel.save).not.toHaveBeenCalled();
   });
 
   test("user registration succeeds with a valid email", async () => {
