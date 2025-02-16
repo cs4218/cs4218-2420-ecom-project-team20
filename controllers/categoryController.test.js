@@ -1,8 +1,7 @@
 import { expect, jest } from "@jest/globals";
-import { categoryControlller, createCategoryController } from "./categoryController.js";
+import { categoryController, createCategoryController } from "./categoryController.js";
 import categoryModel from "../models/categoryModel.js";
 import mongoose from "mongoose";
-import { beforeEach } from "node:test";
 import slugify from "slugify";
 
 jest.mock("../models/categoryModel.js", () => {
@@ -48,12 +47,16 @@ describe("Create Category Controller Test", () => {
   });
 
   test("create category will not add an existing category", async () => {
-    categoryModel.findOne.mockResolvedValue({ name: "testCategory" })
+    categoryModel.findOne.mockResolvedValue({ name: req.body.name })
 
-    await categoryControlller(req, res);
+    await createCategoryController(req, res);
     
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(categoryModel).not.toHaveBeenCalled();
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: "Category Already Exisits"
+    })
+    expect(categoryModel.findOne).toHaveBeenCalledWith({ name: req.body.name });
     expect(categoryModel.save).not.toHaveBeenCalled();
   });
 })
