@@ -189,4 +189,33 @@ describe("Register Component", () => {
       expect(toast.error).toHaveBeenCalledWith("Something went wrong");
     });
   });
+
+  it("should not submit when required fields are missing", async () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    fireEvent.click(getByText("REGISTER"));
+
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
+  it("should show validation errors when required fields are missing", () => {
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const emailInput = getByPlaceholderText("Enter Your Email");
+
+    fireEvent.click(getByText("REGISTER"));
+
+    expect(emailInput).toBeInvalid();
+  });
 });
