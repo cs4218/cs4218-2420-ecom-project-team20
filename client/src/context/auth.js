@@ -13,6 +13,13 @@ const AuthProvider = ({ children }) => {
   //default axios
   axios.defaults.headers.common["Authorization"] = auth?.token;
 
+  //sync auth to localStorage when auth changes
+  useEffect(() => {
+    if (auth.user) {
+      localStorage.setItem("auth", JSON.stringify(auth));
+    }
+  }, [auth]);
+
   useEffect(() => {
     const data = localStorage.getItem("auth");
     if (data) {

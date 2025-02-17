@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { AuthProvider, useAuth } from "./auth";
 import axios from "axios";
@@ -32,18 +32,21 @@ describe("AuthProvider", () => {
 
   it("should load auth data from localStorage if available", async () => {
     // Simulate stored data in localStorage
-    const authData = { user: { name: "John Doe" }, token: "fakeToken" };
+    const authData = { user: { name: "Jane Doe" }, token: "fakeToken" };
     localStorage.setItem("auth", JSON.stringify(authData));
 
-    // Test if auth context is initialized correctly
+    // Render the component inside the AuthProvider
     render(
       <AuthProvider>
         <TestAuthComponent />
       </AuthProvider>
     );
 
-    const userName = await screen.findByText("User: John Doe");
+    // Verify that the user name is loaded from localStorage
+    const userName = await screen.findByText("User: Jane Doe");
     expect(userName).toBeInTheDocument();
+
+    // Check that the Authorization token is set in axios headers
     expect(axios.defaults.headers.common["Authorization"]).toBe("fakeToken");
   });
 
@@ -81,6 +84,40 @@ describe("AuthProvider", () => {
     expect(userName).toBeInTheDocument();
     // check if axios authorization header is updated
     expect(axios.defaults.headers.common["Authorization"]).toBe("newFakeToken");
+  });
+
+  it("should set auth data in localStorage on update", async () => {
+    const setItemMock = jest.spyOn(Storage.prototype, "setItem");
+    render(
+      <AuthProvider>
+        <TestAuthComponent />
+      </AuthProvider>
+    );
+
+    // Check initial state
+    expect(screen.getByText("User: null")).toBeInTheDocument();
+
+    // New auth data to be set
+    const newAuthData = {
+      user: { name: "Jane Doe" },
+      token: "newFakeToken",
+    };
+
+    // Click the button to update state
+    fireEvent.click(screen.getByText("Update Auth"));
+
+    await waitFor(() => {
+      // Check if auth data is set in localStorage
+      expect(setItemMock).toHaveBeenCalledWith(
+        "auth",
+        JSON.stringify(newAuthData)
+      );
+    });
+
+    const userName = await screen.findByText("User: Jane Doe");
+    expect(userName).toBeInTheDocument();
+
+    setItemMock.mockRestore();
   });
 });
 
