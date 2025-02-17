@@ -219,6 +219,30 @@ describe("Login Component", () => {
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
   });
 
+  it("should handle network error and show error message", async () => {
+    axios.post.mockRejectedValueOnce(new Error("Network Error"));
+    const { getByPlaceholderText, getByText } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.click(getByText("LOGIN"));
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+  });
+
   it("should store auth data after successful login", async () => {
     // Mocking post method to return resolved promise with data
     axios.post.mockResolvedValueOnce({
