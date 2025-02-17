@@ -158,6 +158,44 @@ describe("Login Component", () => {
     });
   });
 
+  it("should navigate to home page after successful login", async () => {
+    const mockNavigate = jest.fn();
+    require("react-router-dom").useNavigate.mockReturnValue(mockNavigate);
+
+    axios.post.mockResolvedValueOnce({
+      data: {
+        success: true,
+        user: { id: 1, name: "John Doe", email: "test@example.com" },
+        token: "mockToken",
+      },
+    });
+
+    const { getByPlaceholderText, getByText } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<div>Home Page</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Fill out the login form
+    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
+      target: { value: "test@example.com" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
+      target: { value: "password123" },
+    });
+    // Click the login button
+    fireEvent.click(getByText("LOGIN"));
+
+    // Wait for the mock API call to be completed and the navigation to be triggered
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+
+    // Ensure navigate function was called with the correct URL ("/")
+    expect(mockNavigate).toHaveBeenCalledWith("/");
+  });
+
   it("should display error message on failed login", async () => {
     axios.post.mockRejectedValueOnce({ message: "Invalid credentials" });
 
