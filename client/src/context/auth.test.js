@@ -61,8 +61,11 @@ describe("AuthProvider", () => {
       </AuthProvider>
     );
 
+    // Check that the user name is null
     const userName = await screen.findByText("User: null");
     expect(userName).toBeInTheDocument();
+
+    // Check that the Authorization token is not set in axios headers
     expect(axios.defaults.headers.common["Authorization"]).toBe("");
   });
 
@@ -82,6 +85,7 @@ describe("AuthProvider", () => {
     // Wait for state update and check new user name
     const userName = await screen.findByText("User: Jane Doe");
     expect(userName).toBeInTheDocument();
+
     // check if axios authorization header is updated
     expect(axios.defaults.headers.common["Authorization"]).toBe("newFakeToken");
   });
@@ -114,6 +118,7 @@ describe("AuthProvider", () => {
       );
     });
 
+    // Check if user name is updated
     const userName = await screen.findByText("User: Jane Doe");
     expect(userName).toBeInTheDocument();
 
