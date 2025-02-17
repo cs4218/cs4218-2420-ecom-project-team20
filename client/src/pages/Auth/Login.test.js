@@ -5,6 +5,7 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "@testing-library/jest-dom/extend-expect";
 import toast from "react-hot-toast";
 import Login from "./Login";
+import { useNavigate } from "react-router-dom";
 
 // Mocking axios.post
 jest.mock("axios");
@@ -22,6 +23,12 @@ jest.mock("../../context/cart", () => ({
 
 jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
+}));
+
+// Mocking react-router-dom's useNavigate hook
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: jest.fn(),
 }));
 
 Object.defineProperty(window, "localStorage", {
@@ -61,6 +68,7 @@ describe("Login Component", () => {
     expect(getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
     expect(getByPlaceholderText("Enter Your Password")).toBeInTheDocument();
   });
+
   it("inputs should be initially empty", () => {
     const { getByText, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/login"]}>
@@ -73,6 +81,23 @@ describe("Login Component", () => {
     expect(getByText("LOGIN FORM")).toBeInTheDocument();
     expect(getByPlaceholderText("Enter Your Email").value).toBe("");
     expect(getByPlaceholderText("Enter Your Password").value).toBe("");
+  });
+
+  it("should navigate to forgot password page", () => {
+    const mockNavigate = jest.fn();
+    require("react-router-dom").useNavigate.mockReturnValue(mockNavigate);
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<div>Forgot Password</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(getByText("Forgot Password"));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
   });
 
   it("should allow typing email and password", () => {
