@@ -80,7 +80,7 @@ describe("AuthProvider", () => {
     expect(screen.getByText("User: null")).toBeInTheDocument();
 
     // Click the button to update state
-    fireEvent.click(screen.getByText("Update Auth"));
+    fireEvent.click(screen.getByText("Login"));
 
     // Wait for state update and check new user name
     const userName = await screen.findByText("User: Jane Doe");
@@ -108,7 +108,7 @@ describe("AuthProvider", () => {
     };
 
     // Click the button to update state
-    fireEvent.click(screen.getByText("Update Auth"));
+    fireEvent.click(screen.getByText("Login"));
 
     await waitFor(() => {
       // Check if auth data is set in localStorage
@@ -124,6 +124,35 @@ describe("AuthProvider", () => {
 
     setItemMock.mockRestore();
   });
+
+  it("should remove auth data upon logout", async () => {
+    const removeItemMock = jest.spyOn(Storage.prototype, "removeItem");
+
+    render(
+      <AuthProvider>
+        <TestAuthComponent />
+      </AuthProvider>
+    );
+
+    // Login
+    fireEvent.click(screen.getByText("Login"));
+
+    // Wait for state update
+    const userName = await screen.findByText("User: Jane Doe");
+    expect(userName).toBeInTheDocument();
+
+    // Logout
+    fireEvent.click(screen.getByText("Logout"));
+
+    // Wait for state update
+    await waitFor(() => {
+      expect(
+        screen.getByText((content) => content.includes("User: null"))
+      ).toBeInTheDocument();
+    });
+
+    removeItemMock.mockRestore();
+  });
 });
 
 const TestAuthComponent = () => {
@@ -137,8 +166,9 @@ const TestAuthComponent = () => {
           setAuth({ user: { name: "Jane Doe" }, token: "newFakeToken" })
         }
       >
-        Update Auth
+        Login
       </button>
+      <button onClick={() => setAuth({ user: null, token: "" })}>Logout</button>
     </div>
   );
 };

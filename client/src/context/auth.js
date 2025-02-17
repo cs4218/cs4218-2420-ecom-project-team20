@@ -13,13 +13,6 @@ const AuthProvider = ({ children }) => {
   //default axios
   axios.defaults.headers.common["Authorization"] = auth?.token;
 
-  //sync auth to localStorage when auth changes
-  useEffect(() => {
-    if (auth.user) {
-      localStorage.setItem("auth", JSON.stringify(auth));
-    }
-  }, [auth]);
-
   useEffect(() => {
     const data = localStorage.getItem("auth");
     if (data) {
@@ -32,6 +25,16 @@ const AuthProvider = ({ children }) => {
     }
     //eslint-disable-next-line
   }, []);
+
+  //sync auth to localStorage when auth changes
+  useEffect(() => {
+    if (auth.user) {
+      localStorage.setItem("auth", JSON.stringify(auth));
+    } else {
+      localStorage.removeItem("auth"); // Ensure removal on logout
+    }
+  }, [auth]);
+
   return (
     <AuthContext.Provider value={[auth, setAuth]}>
       {children}
