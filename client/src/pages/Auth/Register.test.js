@@ -48,6 +48,27 @@ describe("Register Component", () => {
     jest.clearAllMocks();
   });
 
+  it("renders the registration form correctly", () => {
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(getByPlaceholderText("Enter Your Name")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Password")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Phone")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Address")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your DOB")).toBeInTheDocument();
+    expect(
+      getByPlaceholderText("What is Your Favorite sports")
+    ).toBeInTheDocument();
+    expect(getByText("REGISTER")).toBeInTheDocument();
+  });
+
   it("should register the user successfully", async () => {
     axios.post.mockResolvedValueOnce({ data: { success: true } });
 
