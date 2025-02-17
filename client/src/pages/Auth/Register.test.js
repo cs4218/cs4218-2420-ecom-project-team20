@@ -148,4 +148,45 @@ describe("Register Component", () => {
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
   });
+
+  it("should show error toast on server error", async () => {
+    axios.post.mockRejectedValue(new Error("Network error"));
+
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(getByPlaceholderText("Enter Your Name"), {
+      target: { value: "John Doe" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
+      target: { value: "john@example.com" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Phone"), {
+      target: { value: "1234567890" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Address"), {
+      target: { value: "123 Main St" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your DOB"), {
+      target: { value: "2000-01-01" },
+    });
+    fireEvent.change(getByPlaceholderText("What is Your Favorite sports"), {
+      target: { value: "Soccer" },
+    });
+
+    fireEvent.click(getByText("REGISTER"));
+
+    // Wait for toast to be called
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+  });
 });
