@@ -180,4 +180,47 @@ describe("Login Component", () => {
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
   });
+
+  it("should store auth data after successful login", async () => {
+    // Mocking post method to return resolved promise with data
+    axios.post.mockResolvedValueOnce({
+      data: {
+        success: true,
+        user: { id: 1, name: "John Doe", email: "test@example.com" },
+        token: "mockToken",
+      },
+    });
+
+    const { getByPlaceholderText, getByText } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Set input email value
+    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
+      target: { value: "test@example.com" },
+    });
+    // Set input password value
+    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
+      target: { value: "password123" },
+    });
+    // Click the login button
+    fireEvent.click(getByText("LOGIN"));
+
+    // Wait for axios.post to be called
+    await waitFor(() => expect(axios.post).toHaveBeenCalled());
+
+    // Check if localStorage.setItem is called with the correct data
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      "auth",
+      JSON.stringify({
+        success: true,
+        user: { id: 1, name: "John Doe", email: "test@example.com" },
+        token: "mockToken",
+      })
+    );
+  });
 });
