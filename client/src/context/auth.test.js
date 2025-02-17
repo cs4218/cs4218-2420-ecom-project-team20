@@ -38,7 +38,7 @@ describe("AuthProvider", () => {
     // Test if auth context is initialized correctly
     render(
       <AuthProvider>
-        <TestComponent />
+        <TestAuthComponent />
       </AuthProvider>
     );
 
@@ -47,29 +47,54 @@ describe("AuthProvider", () => {
     expect(axios.defaults.headers.common["Authorization"]).toBe("fakeToken");
   });
 
-  it("should not load auth data if not in localStorage", () => {
+  it("should not load auth data if not in localStorage", async () => {
     // Ensure localStorage is empty
     localStorage.clear();
 
     // Test the component behavior when no auth data is in localStorage
     render(
       <AuthProvider>
-        <TestComponent />
+        <TestAuthComponent />
       </AuthProvider>
     );
 
-    expect(screen.getByText("User: null")).toBeInTheDocument();
+    const userName = await screen.findByText("User: null");
+    expect(userName).toBeInTheDocument();
     expect(axios.defaults.headers.common["Authorization"]).toBe("");
+  });
+
+  it("should update auth state when setAuth is called", async () => {
+    render(
+      <AuthProvider>
+        <TestAuthComponent />
+      </AuthProvider>
+    );
+
+    // Check initial state
+    expect(screen.getByText("User: null")).toBeInTheDocument();
+
+    // Click the button to update state
+    fireEvent.click(screen.getByText("Update Auth"));
+
+    // Wait for state update and check new user name
+    const userName = await screen.findByText("User: Jane Doe");
+    expect(userName).toBeInTheDocument();
   });
 });
 
-// Test Component to use useAuth hook in context
-const TestComponent = () => {
+const TestAuthComponent = () => {
   const [auth, setAuth] = useAuth();
 
   return (
     <div>
-      <div>User: {auth.user ? auth.user.name : "null"}</div>
+      <p>User: {auth.user ? auth.user.name : "null"}</p>
+      <button
+        onClick={() =>
+          setAuth({ user: { name: "Jane Doe" }, token: "newFakeToken" })
+        }
+      >
+        Update Auth
+      </button>
     </div>
   );
 };
