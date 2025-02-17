@@ -79,6 +79,8 @@ describe("AuthProvider", () => {
     // Wait for state update and check new user name
     const userName = await screen.findByText("User: Jane Doe");
     expect(userName).toBeInTheDocument();
+    // check if axios authorization header is updated
+    expect(axios.defaults.headers.common["Authorization"]).toBe("newFakeToken");
   });
 });
 
