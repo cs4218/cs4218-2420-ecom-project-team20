@@ -46,6 +46,21 @@ describe("AuthProvider", () => {
     expect(userName).toBeInTheDocument();
     expect(axios.defaults.headers.common["Authorization"]).toBe("fakeToken");
   });
+
+  it("should not load auth data if not in localStorage", () => {
+    // Ensure localStorage is empty
+    localStorage.clear();
+
+    // Test the component behavior when no auth data is in localStorage
+    render(
+      <AuthProvider>
+        <TestComponent />
+      </AuthProvider>
+    );
+
+    expect(screen.getByText("User: null")).toBeInTheDocument();
+    expect(axios.defaults.headers.common["Authorization"]).toBe("");
+  });
 });
 
 // Test Component to use useAuth hook in context
