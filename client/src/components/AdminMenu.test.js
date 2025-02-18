@@ -5,6 +5,14 @@ import AdminMenu from "./AdminMenu";
 import "@testing-library/jest-dom";
 
 describe("AdminMenu Component", () => {
+  const setup = (initialRoute) => {
+    return render(
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <AdminMenu />
+      </MemoryRouter>
+    );
+  };
+
   it("renders all admin links correctly", () => {
     const { getByText } = render(
       <MemoryRouter initialEntries={["/dashboard/admin"]}>
@@ -46,5 +54,25 @@ describe("AdminMenu Component", () => {
       "href",
       "/dashboard/admin/orders"
     );
+  });
+
+  it("applies 'active' class to 'Create Category' when on that route", () => {
+    const { getByText } = setup("/dashboard/admin/create-category");
+    expect(getByText("Create Category")).toHaveClass("active");
+  });
+
+  it("applies 'active' class to 'Create Product' when on that route", () => {
+    const { getByText } = setup("/dashboard/admin/create-product");
+    expect(getByText("Create Product")).toHaveClass("active");
+  });
+
+  it("applies 'active' class to 'Products' when on that route", () => {
+    const { getByText } = setup("/dashboard/admin/products");
+    expect(getByText("Products")).toHaveClass("active");
+  });
+
+  it("applies 'active' class to 'Orders' when on that route", () => {
+    const { getByText } = setup("/dashboard/admin/orders");
+    expect(getByText("Orders")).toHaveClass("active");
   });
 });
