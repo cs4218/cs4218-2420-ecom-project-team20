@@ -20,4 +20,31 @@ describe("AdminMenu Component", () => {
     expect(getByText("Products")).toBeInTheDocument();
     expect(getByText("Orders")).toBeInTheDocument();
   });
+
+  it("ensures links point to correct routes", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/dashboard/admin"]}>
+        <Routes>
+          <Route path="/dashboard/admin" element={<AdminMenu />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(getByText("Create Category").closest("a")).toHaveAttribute(
+      "href",
+      "/dashboard/admin/create-category"
+    );
+    expect(getByText("Create Product").closest("a")).toHaveAttribute(
+      "href",
+      "/dashboard/admin/create-product"
+    );
+    expect(getByText("Products").closest("a")).toHaveAttribute(
+      "href",
+      "/dashboard/admin/products"
+    );
+    expect(getByText("Orders").closest("a")).toHaveAttribute(
+      "href",
+      "/dashboard/admin/orders"
+    );
+  });
 });
