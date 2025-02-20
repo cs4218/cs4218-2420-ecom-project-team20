@@ -1,7 +1,11 @@
 import { hashPassword, comparePassword } from "./authHelper.js";
 import bcrypt from "bcrypt";
 
-jest.mock("bcrypt");
+
+jest.mock("bcrypt", () => ({
+    hash: jest.fn(),
+    compare: jest.fn(),
+}));
 
 describe("Password Hashing and Comparison", () => {
     const plainPassword = "securePassword123";
