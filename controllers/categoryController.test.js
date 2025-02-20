@@ -63,7 +63,7 @@ describe("Create Category Controller Test", () => {
     expect(categoryModel.save).not.toHaveBeenCalled();
   });
 
-  test("create new category will add it to categories", async () => {
+  test("should successfully create new category", async () => {
     categoryModel.findOne.mockResolvedValue(null);
 
     categoryModel.create.mockResolvedValue({
@@ -89,6 +89,19 @@ describe("Create Category Controller Test", () => {
         slug: req.body.slug,
       }
     })
+  });
+
+  test("should handle errors when creating categories", async () => {
+    categoryModel.findOne.mockRejectedValue(new Error("DB Error"));
+
+    await createCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: expect.any(Error),
+      message: "Errro in Category"
+    });
   })
 
   afterEach(() => {
@@ -103,18 +116,16 @@ describe("Create Category Controller Test", () => {
 });
 
 describe("Update Category Controller Test", () => {
-  const categoryOld = "categoryOld";
   const categoryNew = "categoryNew";
-  const validId = "validId";
-  const invalidId = "invalidId";
+  const id = "cat001"
   let req, res;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.clearAllMocks(); 
     jest.useFakeTimers();
 
     req = {
-      params: { id: validId },
+      params: { id: id },
       body: {
         name: categoryNew,
         slug: slugify(categoryNew),
@@ -128,8 +139,8 @@ describe("Update Category Controller Test", () => {
     };
   });
 
-  test("Update category with valid id", async () => {
-    categoryModel.findByIdAndUpdate.mockResolvedValue(validId, {name: req.body.name, slug: req.body.slug}, {new: true});
+  test("should successfully update category with new name", async () => {
+    categoryModel.findByIdAndUpdate.mockResolvedValue(id, {name: req.body.name, slug: req.body.slug}, {new: true});
 
     await updateCategoryController(req, res);
 
@@ -142,23 +153,19 @@ describe("Update Category Controller Test", () => {
     expect(res.send).toHaveBeenCalledWith({
       success: true,
       messsage: "Category Updated Successfully",
-      category: validId,
+      category: id,
     });
   });
 
-  test("Update category with invalid id", async () => {
-    req.params.id = invalidId;
+  test("should handle errors when updating categories", async () => {
+    categoryModel.findByIdAndUpdate.mockRejectedValue(new Error("DB Error"));
 
     await updateCategoryController(req, res);
 
-    expect(categoryModel.findByIdAndUpdate).toHaveBeenCalledWith(
-      invalidId,
-      { name: req.body.name, slug: req.body.slug },
-      { new: true }
-    );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
+      error: expect.any(Error),
       message: "Error while updating category"
     });
   })
