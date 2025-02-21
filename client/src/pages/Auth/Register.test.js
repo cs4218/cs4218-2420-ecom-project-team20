@@ -48,6 +48,27 @@ describe("Register Component", () => {
     jest.clearAllMocks();
   });
 
+  it("renders the registration form correctly", () => {
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(getByPlaceholderText("Enter Your Name")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Password")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Phone")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Address")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your DOB")).toBeInTheDocument();
+    expect(
+      getByPlaceholderText("What is Your Favorite sports")
+    ).toBeInTheDocument();
+    expect(getByText("REGISTER")).toBeInTheDocument();
+  });
+
   it("should register the user successfully", async () => {
     axios.post.mockResolvedValueOnce({ data: { success: true } });
 
@@ -126,5 +147,75 @@ describe("Register Component", () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+  });
+
+  it("should show error toast on server error", async () => {
+    axios.post.mockRejectedValue(new Error("Network error"));
+
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(getByPlaceholderText("Enter Your Name"), {
+      target: { value: "John Doe" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
+      target: { value: "john@example.com" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
+      target: { value: "password123" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Phone"), {
+      target: { value: "1234567890" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your Address"), {
+      target: { value: "123 Main St" },
+    });
+    fireEvent.change(getByPlaceholderText("Enter Your DOB"), {
+      target: { value: "2000-01-01" },
+    });
+    fireEvent.change(getByPlaceholderText("What is Your Favorite sports"), {
+      target: { value: "Soccer" },
+    });
+
+    fireEvent.click(getByText("REGISTER"));
+
+    // Wait for toast to be called
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+  });
+
+  it("should not submit when required fields are missing", async () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    fireEvent.click(getByText("REGISTER"));
+
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
+  it("should show validation errors when required fields are missing", () => {
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const emailInput = getByPlaceholderText("Enter Your Email");
+
+    fireEvent.click(getByText("REGISTER"));
+
+    expect(emailInput).toBeInvalid();
   });
 });
