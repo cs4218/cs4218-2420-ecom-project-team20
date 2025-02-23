@@ -27,6 +27,23 @@ describe("CategoryForm Component", () => {
     expect(getByRole("button", { name: /submit/i })).toBeInTheDocument();
   });
 
+  it("allows user to type in input field", () => {
+    const { getByPlaceholderText } = render(
+      <MemoryRouter>
+        <CategoryForm
+          handleSubmit={handleSubmit}
+          value=""
+          setValue={setValue}
+        />
+      </MemoryRouter>
+    );
+
+    const input = getByPlaceholderText("Enter new category");
+    fireEvent.change(input, { target: { value: "New Category" } });
+
+    expect(setValue).toHaveBeenCalledWith("New Category");
+  });
+
   it("clears input field after submission", () => {
     const MockComponent = () => {
       const [value, setValue] = useState(""); // Local state for input
