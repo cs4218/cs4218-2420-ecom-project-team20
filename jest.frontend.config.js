@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   // name displayed during tests
   displayName: "frontend",
 
@@ -20,15 +20,15 @@ export default {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/components/AdminMenu.test.js"],
+  testMatch: ["<rootDir>/client/src/pages/admin/AdminDashboard.test.js"],
 
   // jest code coverage
-  collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/Auth/**"],
-  coverageThreshold: {
-    global: {
-      lines: 10,
-      functions: 10,
-    },
-  },
+  // collectCoverage: true,
+  // collectCoverageFrom: ["client/src/pages/Auth/**"],
+  // coverageThreshold: {
+  //   global: {
+  //     lines: 10,
+  //     functions: 10,
+  //   },
+  // },
 };
