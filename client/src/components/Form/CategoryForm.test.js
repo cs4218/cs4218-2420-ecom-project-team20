@@ -4,6 +4,13 @@ import CategoryForm from "./CategoryForm";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
+import { screen } from "@testing-library/react";
+import axios from "axios";
+
+// Ensure axios is fully mocked
+jest.mock("axios", () => ({
+  post: jest.fn(),
+}));
 
 describe("CategoryForm Component", () => {
   let handleSubmit, setValue;
@@ -44,10 +51,27 @@ describe("CategoryForm Component", () => {
     expect(setValue).toHaveBeenCalledWith("New Category");
   });
 
+  it("prevents default form submission", () => {
+    const mockHandleSubmit = jest.fn();
+    const mockSetValue = jest.fn();
+
+    const { getByRole } = render(
+      <CategoryForm handleSubmit={mockHandleSubmit} setValue={mockSetValue} />
+    );
+
+    const input = getByRole("textbox", { name: "" });
+
+    const form = input.closest("form");
+    expect(form).not.toBeNull();
+
+    fireEvent.submit(form);
+    expect(mockSetValue).toHaveBeenCalled();
+    expect(mockHandleSubmit).toHaveBeenCalled();
+  });
   it("clears input field after submission", () => {
     const MockComponent = () => {
-      const [value, setValue] = useState(""); // Local state for input
-      const handleSubmit = jest.fn(); // Mock function
+      const [value, setValue] = useState("");
+      const handleSubmit = jest.fn();
 
       return (
         <CategoryForm

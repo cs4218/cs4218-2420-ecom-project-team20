@@ -3,12 +3,13 @@ import React from "react";
 const CategoryForm = ({ handleSubmit, value, setValue }) => {
   const onSubmit = (e) => {
     e.preventDefault();
+    console.log("form submitted prevent default called");
     handleSubmit(e);
     setValue("");
   };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} data-testid="category-form">
       <div className="mb-3">
         <input
           type="text"
