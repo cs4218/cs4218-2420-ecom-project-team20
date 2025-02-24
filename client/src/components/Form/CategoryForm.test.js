@@ -1,13 +1,19 @@
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import CategoryForm from "./CategoryForm";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
+import toast from "react-hot-toast";
 
 // Ensure axios is fully mocked
 jest.mock("axios", () => ({
   post: jest.fn(),
+}));
+
+jest.mock("react-hot-toast", () => ({
+  error: jest.fn(),
+  success: jest.fn(),
 }));
 
 describe("CategoryForm Component", () => {
@@ -111,5 +117,43 @@ describe("CategoryForm Component", () => {
 
     // Check if input is cleared after submission
     expect(input.value).toBe(""); // Input should be empty
+  });
+
+  it("should throw error upon submission of duplicate categories", async () => {
+    const categories = [
+      { _id: "1", name: "Electronics" },
+      { _id: "2", name: "Clothing" },
+    ];
+
+    const mockHandleSubmit = jest.fn((e) => {
+      e.preventDefault();
+      if (categories.some((c) => c.name.toLowerCase() === "electronics")) {
+        toast.error("Category already exists!");
+      }
+    });
+
+    const { getByPlaceholderText, getByRole } = render(
+      <MemoryRouter>
+        <CategoryForm
+          handleSubmit={mockHandleSubmit}
+          value="Electronics"
+          setValue={jest.fn()}
+          categories={categories}
+        />
+      </MemoryRouter>
+    );
+
+    const input = getByPlaceholderText("Enter new category");
+    const submitButton = getByRole("button", { name: /submit/i });
+
+    fireEvent.change(input, { target: { value: "Electronics" } });
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Category already exists!");
+    });
+
+    expect(mockHandleSubmit).toHaveBeenCalled();
   });
 });

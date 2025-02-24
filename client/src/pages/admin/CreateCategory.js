@@ -14,12 +14,28 @@ const CreateCategory = () => {
   //handle Form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const trimmedName = name.trim();
+    console.log("trimmedName: ", trimmedName);
+    console.log("categories: ", categories);
+    if (!trimmedName) {
+      toast.error("Category cannot be empty.");
+      return;
+    }
+
+    if (
+      categories.some(
+        (cat) => cat.name.toLowerCase() === trimmedName.toLowerCase()
+      )
+    ) {
+      toast.error("Category already exists!");
+      return;
+    }
     try {
       const { data } = await axios.post("/api/v1/category/create-category", {
-        name,
+        name: trimmedName,
       });
       if (data?.success) {
-        toast.success(`${name} is created`);
+        toast.success(`${trimmedName} is created`);
         getAllCategory();
       } else {
         toast.error(data.message);
