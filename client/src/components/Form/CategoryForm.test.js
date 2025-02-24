@@ -4,8 +4,6 @@ import CategoryForm from "./CategoryForm";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
-import { screen } from "@testing-library/react";
-import axios from "axios";
 
 // Ensure axios is fully mocked
 jest.mock("axios", () => ({
@@ -68,6 +66,22 @@ describe("CategoryForm Component", () => {
     expect(mockSetValue).toHaveBeenCalled();
     expect(mockHandleSubmit).toHaveBeenCalled();
   });
+
+  it("disables submit button when input is empty", () => {
+    const { getByRole } = render(
+      <MemoryRouter>
+        <CategoryForm
+          handleSubmit={handleSubmit}
+          value=""
+          setValue={setValue}
+        />
+      </MemoryRouter>
+    );
+
+    const submitButton = getByRole("button", { name: /submit/i });
+    expect(submitButton).toBeDisabled();
+  });
+
   it("clears input field after submission", () => {
     const MockComponent = () => {
       const [value, setValue] = useState("");
