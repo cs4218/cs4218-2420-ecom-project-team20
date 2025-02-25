@@ -153,7 +153,6 @@ const CreateCategory = () => {
                 </tbody>
               </table>
             </div>
-
             {visible && (
               <Modal
                 onCancel={() => setVisible(false)}
@@ -167,7 +166,6 @@ const CreateCategory = () => {
                 />
               </Modal>
             )}
-
             <CategoryForm
               value={updatedName}
               setValue={setUpdatedName}
