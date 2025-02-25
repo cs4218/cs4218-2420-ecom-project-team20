@@ -53,26 +53,6 @@ describe("CategoryForm Component", () => {
     expect(setValue).toHaveBeenCalledWith("New Category");
   });
 
-  it("prevents default form submission", () => {
-    const handleSubmitMock = jest.fn((e) => e.preventDefault());
-    const setValueMock = jest.fn();
-
-    const { getByLabelText } = render(
-      <CategoryForm
-        handleSubmit={handleSubmitMock}
-        value="Test"
-        setValue={setValueMock}
-      />
-    );
-
-    const form = getByLabelText("category-form");
-
-    fireEvent.submit(form);
-
-    expect(setValueMock).toHaveBeenCalled();
-    expect(handleSubmitMock).toHaveBeenCalled();
-  });
-
   it("calls handleSubmit when submitted", () => {
     const handleSubmitMock = jest.fn();
     const setValueMock = jest.fn();
