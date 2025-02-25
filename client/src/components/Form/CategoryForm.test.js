@@ -5,12 +5,10 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 // Ensure axios is fully mocked
-jest.mock("axios", () => ({
-  post: jest.fn(),
-}));
-
+jest.mock("axios");
 jest.mock("react-hot-toast", () => ({
   error: jest.fn(),
   success: jest.fn(),
@@ -155,5 +153,38 @@ describe("CategoryForm Component", () => {
     });
 
     expect(mockHandleSubmit).toHaveBeenCalled();
+  });
+
+  it("should not update if the new category name already exists", async () => {
+    const categories = [
+      { _id: "1", name: "Electronics" },
+      { _id: "2", name: "Clothing" },
+    ];
+
+    const handleUpdate = jest.fn(); // Mock the update function
+    axios.put.mockResolvedValue({ data: { success: true } });
+
+    const { getByPlaceholderText, getByRole } = render(
+      <CategoryForm
+        handleSubmit={handleUpdate} // Mock handleSubmit
+        value="Clothing"
+        setValue={jest.fn()}
+        categories={categories}
+      />
+    );
+
+    const input = getByPlaceholderText("Enter new category");
+    const submitButton = getByRole("button", { name: /submit/i });
+
+    // Simulate entering a duplicate category name
+    fireEvent.change(input, { target: { value: "Clothing" } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Category already exists!");
+    });
+
+    expect(handleUpdate).not.toHaveBeenCalled(); // Ensure update function was blocked
+    expect(axios.put).not.toHaveBeenCalled(); // Ensure API call was blocked
   });
 });

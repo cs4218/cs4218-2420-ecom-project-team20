@@ -15,8 +15,6 @@ const CreateCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const trimmedName = name.trim();
-    console.log("trimmedName: ", trimmedName);
-    console.log("categories: ", categories);
     if (!trimmedName) {
       toast.error("Category cannot be empty.");
       return;
@@ -42,7 +40,7 @@ const CreateCategory = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("somthing went wrong in input form");
+      toast.error("Something went wrong in input form");
     }
   };
 
@@ -51,11 +49,11 @@ const CreateCategory = () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
       if (data.success) {
-        setCategories(data.category);
+        setCategories(Array.isArray(data.category) ? data.category : []);
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something wwent wrong in getting catgeory");
+      toast.error("Something went wrong in getting category");
     }
   };
 
@@ -66,6 +64,7 @@ const CreateCategory = () => {
   //update category
   const handleUpdate = async (e) => {
     e.preventDefault();
+
     try {
       const { data } = await axios.put(
         `/api/v1/category/update-category/${selected._id}`,
@@ -127,46 +126,53 @@ const CreateCategory = () => {
                 </thead>
                 <tbody>
                   {categories?.map((c) => (
-                    <>
-                      <tr>
-                        <td key={c._id}>{c.name}</td>
-                        <td>
-                          <button
-                            className="btn btn-primary ms-2"
-                            onClick={() => {
-                              setVisible(true);
-                              setUpdatedName(c.name);
-                              setSelected(c);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-danger ms-2"
-                            onClick={() => {
-                              handleDelete(c._id);
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    </>
+                    <tr key={c._id}>
+                      <td>{c.name}</td>
+                      <td>
+                        <button
+                          className="btn btn-primary ms-2"
+                          onClick={() => {
+                            setVisible(true);
+                            setUpdatedName(c.name);
+                            setSelected(c);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-danger ms-2"
+                          onClick={() => {
+                            handleDelete(c._id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <Modal
-              onCancel={() => setVisible(false)}
-              footer={null}
-              visible={visible}
-            >
-              <CategoryForm
-                value={updatedName}
-                setValue={setUpdatedName}
-                handleSubmit={handleUpdate}
-              />
-            </Modal>
+
+            {visible && (
+              <Modal
+                onCancel={() => setVisible(false)}
+                footer={null}
+                visible={visible}
+              >
+                <CategoryForm
+                  value={updatedName}
+                  setValue={setUpdatedName}
+                  handleSubmit={handleUpdate}
+                />
+              </Modal>
+            )}
+
+            <CategoryForm
+              value={updatedName}
+              setValue={setUpdatedName}
+              handleSubmit={handleUpdate}
+            />
           </div>
         </div>
       </div>
