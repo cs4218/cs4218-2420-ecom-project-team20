@@ -116,4 +116,32 @@ describe("CategoryForm Component", () => {
 
     expect(input.value).toBe("");
   });
+
+  it("prevents submission when input is empty", () => {
+    const handleSubmitMock = jest.fn();
+    const setValueMock = jest.fn();
+
+    const { getByPlaceholderText, getByRole } = render(
+      <MemoryRouter>
+        <CategoryForm
+          handleSubmit={handleSubmitMock}
+          value=""
+          setValue={setValueMock}
+        />
+      </MemoryRouter>
+    );
+
+    const input = getByPlaceholderText("Enter new category");
+    const submitButton = getByRole("button", { name: /submit/i });
+
+    // Submit button should be disabled initially
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.change(input, { target: { value: "   " } });
+    expect(submitButton).toBeDisabled(); // Submit button should still be disabled
+
+    fireEvent.click(submitButton);
+
+    expect(handleSubmitMock).not.toHaveBeenCalled();
+  });
 });
