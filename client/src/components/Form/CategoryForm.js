@@ -8,7 +8,7 @@ const CategoryForm = ({ handleSubmit, value, setValue }) => {
   };
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} aria-label="category-form">
       <div className="mb-3">
         <input
           type="text"

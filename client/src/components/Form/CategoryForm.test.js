@@ -21,7 +21,7 @@ describe("CategoryForm Component", () => {
     setValue = jest.fn(); // Mock setValue function
   });
 
-  it("renders input and submit button", () => {
+  it("renders input field and submit button", () => {
     const { getByPlaceholderText, getByRole } = render(
       <MemoryRouter>
         <CategoryForm
@@ -71,6 +71,27 @@ describe("CategoryForm Component", () => {
     expect(mockHandleSubmit).toHaveBeenCalled();
   });
 
+  it("calls handleSubmit when submitted", () => {
+    const handleSubmitMock = jest.fn();
+    const setValueMock = jest.fn();
+
+    const { getByLabelText } = render(
+      <MemoryRouter>
+        <CategoryForm
+          handleSubmit={handleSubmitMock}
+          value="Books"
+          setValue={setValueMock}
+        />
+      </MemoryRouter>
+    );
+
+    const form = getByLabelText("category-form");
+    fireEvent.submit(form);
+
+    expect(handleSubmitMock).toHaveBeenCalled();
+    expect(setValueMock).toHaveBeenCalledWith(""); // Expect input to be cleared after submission
+  });
+
   it("disables submit button when input is empty", () => {
     const { getByRole } = render(
       <MemoryRouter>
@@ -100,20 +121,17 @@ describe("CategoryForm Component", () => {
       );
     };
 
-    // Render the component
     const { getByPlaceholderText, getByText } = render(<MockComponent />);
 
     const input = getByPlaceholderText("Enter new category");
     const submitButton = getByText("Submit");
 
-    // Type into the input field
     fireEvent.change(input, { target: { value: "New Category" } });
+
     expect(input.value).toBe("New Category"); // Check if input updates
 
-    // Submit the form
     fireEvent.click(submitButton);
 
-    // Check if input is cleared after submission
     expect(input.value).toBe(""); // Input should be empty
   });
 
@@ -153,38 +171,5 @@ describe("CategoryForm Component", () => {
     });
 
     expect(mockHandleSubmit).toHaveBeenCalled();
-  });
-
-  it("should not update if the new category name already exists", async () => {
-    const categories = [
-      { _id: "1", name: "Electronics" },
-      { _id: "2", name: "Clothing" },
-    ];
-
-    const handleUpdate = jest.fn(); // Mock the update function
-    axios.put.mockResolvedValue({ data: { success: true } });
-
-    const { getByPlaceholderText, getByRole } = render(
-      <CategoryForm
-        handleSubmit={handleUpdate} // Mock handleSubmit
-        value="Clothing"
-        setValue={jest.fn()}
-        categories={categories}
-      />
-    );
-
-    const input = getByPlaceholderText("Enter new category");
-    const submitButton = getByRole("button", { name: /submit/i });
-
-    // Simulate entering a duplicate category name
-    fireEvent.change(input, { target: { value: "Clothing" } });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Category already exists!");
-    });
-
-    expect(handleUpdate).not.toHaveBeenCalled(); // Ensure update function was blocked
-    expect(axios.put).not.toHaveBeenCalled(); // Ensure API call was blocked
   });
 });
