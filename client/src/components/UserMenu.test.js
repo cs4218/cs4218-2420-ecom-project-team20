@@ -1,18 +1,37 @@
-import React from "react";
-import { render, screen } from '@testing-library/react'
-import UserMenu from "./UserMenu";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import UserMenu from './UserMenu';
 
-describe ('UserMenu', () => {
+describe('UserMenu', () => {
   it('renders heading', () => {
     render(
-      <MemoryRouter initialEntries={["/dashboard/user"]}>
-        <Routes>
-          <Route path="/dashboard/user" element={<UserMenu />} />
-        </Routes>
+      <MemoryRouter>
+        <UserMenu />
       </MemoryRouter>
     );
-    const heading = screen.getByRole('heading', { level: 4 });
-    expect(heading).toBeInTheDocument();
-  })
-})
+    expect(screen.getByRole('heading', { name: "Dashboard" })).toBeInTheDocument();
+  });
+
+  it('renders link to Profile page', () => {
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+    const profileLink = screen.getByRole('link', { name: "Profile" });
+    expect(profileLink).toBeInTheDocument();
+    expect(profileLink).toHaveAttribute('href', '/dashboard/user/profile');
+  });
+
+  it('renders link to Orders page', () => {
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+    const ordersLink = screen.getByRole('link', { name: "Orders" });
+    expect(ordersLink).toBeInTheDocument();
+    expect(ordersLink).toHaveAttribute('href', '/dashboard/user/orders');
+  });
+});
