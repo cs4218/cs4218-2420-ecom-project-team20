@@ -422,107 +422,117 @@ describe("Update Profile Controller", () => {
   });
 });
 
-// describe("Get Orders Controller", () => {
-//   let req, res;
-//   const ordersArray = [{ orderId: "order1" }, { orderId: "order2" }];
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//     req = { user: { _id: "user123" } };
-//     res = {
-//       status: jest.fn().mockReturnThis(),
-//       send: jest.fn().mockReturnThis(),
-//       json: jest.fn().mockReturnThis(),
-//     };
-//   });
+describe("Get Orders Controller", () => {
+  let req, res;
+  const ordersArray = [{ orderId: "order1" }, { orderId: "order2" }];
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = { user: { _id: "user123" } };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    };
+  });
 
-//   test("should return orders for buyer", async () => {
-//     const mockPopulateSecond = jest.fn().mockResolvedValue(ordersArray);
-//     const mockPopulateFirst = jest.fn(() => ({ populate: mockPopulateSecond }));
-//     orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
-//     await getOrdersController(req, res);
-//     expect(orderModel.find).toHaveBeenCalledWith({ buyer: req.user._id });
-//     expect(res.json).toHaveBeenCalledWith(ordersArray);
-//   });
+  test("should return orders for buyer", async () => {
+    const mockPopulateSecond = jest.fn().mockResolvedValue(ordersArray);
+    const mockPopulateFirst = jest.fn(() => ({ populate: mockPopulateSecond }));
+    orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
+    await getOrdersController(req, res);
+    expect(orderModel.find).toHaveBeenCalledWith({ buyer: req.user._id });
+    expect(res.json).toHaveBeenCalledWith(ordersArray);
+  });
 
-//   test("should handle error while getting orders", async () => {
-//     orderModel.find.mockRejectedValue(new Error("DB error"));
-//     await getOrdersController(req, res);
-//     expect(res.status).toHaveBeenCalledWith(500);
-//     expect(res.send).toHaveBeenCalledWith({
-//       success: false,
-//       message: "Error WHile Geting Orders",
-//       error: expect.any(Error),
-//     });
-//   });
-// });
+  test("should handle error while getting orders", async () => {
+    orderModel.find.mockImplementation(() => ({
+      populate: jest.fn().mockImplementation(() => ({
+        populate: jest.fn().mockRejectedValue(new Error("DB error")),
+      })),
+    }));
+    await getOrdersController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error WHile Geting Orders",
+      error: expect.any(Error),
+    });
+  });
+});
 
-// describe("Get All Orders Controller", () => {
-//   let req, res;
-//   const ordersArray = [{ orderId: "order1" }, { orderId: "order2" }];
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//     req = {};
-//     res = {
-//       status: jest.fn().mockReturnThis(),
-//       send: jest.fn().mockReturnThis(),
-//       json: jest.fn().mockReturnThis(),
-//     };
-//   });
+describe("Get All Orders Controller", () => {
+  let req, res;
+  const ordersArray = [{ orderId: "order1" }, { orderId: "order2" }];
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = {};
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    };
+  });
 
-//   test("should return all orders", async () => {
-//     const mockSort = jest.fn().mockResolvedValue(ordersArray);
-//     const mockPopulateSecond = jest.fn(() => ({ sort: mockSort }));
-//     const mockPopulateFirst = jest.fn(() => ({ populate: mockPopulateSecond }));
-//     orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
-//     await getAllOrdersController(req, res);
-//     expect(orderModel.find).toHaveBeenCalledWith({});
-//     expect(res.json).toHaveBeenCalledWith(ordersArray);
-//   });
+  test("should return all orders", async () => {
+    const mockSort = jest.fn().mockResolvedValue(ordersArray);
+    const mockPopulateSecond = jest.fn(() => ({ sort: mockSort }));
+    const mockPopulateFirst = jest.fn(() => ({ populate: mockPopulateSecond }));
+    orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
+    await getAllOrdersController(req, res);
+    expect(orderModel.find).toHaveBeenCalledWith({});
+    expect(res.json).toHaveBeenCalledWith(ordersArray);
+  });
 
-//   test("should handle error while getting all orders", async () => {
-//     orderModel.find.mockRejectedValue(new Error("DB error"));
-//     await getAllOrdersController(req, res);
-//     expect(res.status).toHaveBeenCalledWith(500);
-//     expect(res.send).toHaveBeenCalledWith({
-//       success: false,
-//       message: "Error WHile Geting Orders",
-//       error: expect.any(Error),
-//     });
-//   });
-// });
+  test("should handle error while getting all orders", async () => {
+    orderModel.find.mockImplementation(() => ({
+      populate: jest.fn().mockImplementation(() => ({
+        populate: jest.fn().mockImplementation(() => ({
+          sort: jest.fn().mockRejectedValue(new Error("DB error")),
+        })),
+      })),
+    }));
+    await getAllOrdersController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error WHile Geting Orders",
+      error: expect.any(Error),
+    });
+  });
+});
 
-// describe("Order Status Controller", () => {
-//   let req, res;
-//   beforeEach(() => {
-//     jest.clearAllMocks();
-//     req = { params: { orderId: "order123" }, body: { status: "Delivered" } };
-//     res = {
-//       status: jest.fn().mockReturnThis(),
-//       send: jest.fn().mockReturnThis(),
-//       json: jest.fn().mockReturnThis(),
-//     };
-//   });
+describe("Order Status Controller", () => {
+  let req, res;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    req = { params: { orderId: "order123" }, body: { status: "Delivered" } };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    };
+  });
 
-//   test("should update order status successfully", async () => {
-//     const updatedOrder = { _id: "order123", status: "Delivered" };
-//     orderModel.findByIdAndUpdate.mockResolvedValue(updatedOrder);
-//     await orderStatusController(req, res);
-//     expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
-//       req.params.orderId,
-//       { status: req.body.status },
-//       { new: true }
-//     );
-//     expect(res.json).toHaveBeenCalledWith(updatedOrder);
-//   });
+  test("should update order status successfully", async () => {
+    const updatedOrder = { _id: "order123", status: "Delivered" };
+    orderModel.findByIdAndUpdate.mockResolvedValue(updatedOrder);
+    await orderStatusController(req, res);
+    expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      req.params.orderId,
+      { status: req.body.status },
+      { new: true }
+    );
+    expect(res.json).toHaveBeenCalledWith(updatedOrder);
+  });
 
-//   test("should handle error while updating order status", async () => {
-//     orderModel.findByIdAndUpdate.mockRejectedValue(new Error("DB error"));
-//     await orderStatusController(req, res);
-//     expect(res.status).toHaveBeenCalledWith(500);
-//     expect(res.send).toHaveBeenCalledWith({
-//       success: false,
-//       message: "Error While Updateing Order",
-//       error: expect.any(Error),
-//     });
-//   });
-// });
+  test("should handle error while updating order status", async () => {
+    orderModel.findByIdAndUpdate.mockRejectedValue(new Error("DB error"));
+    await orderStatusController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error While Updateing Order",
+      error: expect.any(Error),
+    });
+  });
+});
