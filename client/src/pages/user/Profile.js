@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import UserMenu from "../../components/UserMenu";
+
 import Layout from "./../../components/Layout";
+import UserMenu from "../../components/UserMenu";
 import { useAuth } from "../../context/auth";
-import toast from "react-hot-toast";
+
 import axios from "axios";
+import toast from "react-hot-toast";
+
 const Profile = () => {
   //context
   const [auth, setAuth] = useAuth();
@@ -50,21 +53,21 @@ const Profile = () => {
     }
   };
   return (
-    <Layout title={"Your Profile"}>
+    <Layout title={ "Your Profile" }>
       <div className="container-fluid m-3 p-3">
         <div className="row">
           <div className="col-md-3">
-            <UserMenu />
+            <UserMenu/>
           </div>
           <div className="col-md-9">
-            <div className="form-container ">
-              <form onSubmit={handleSubmit}>
+            <div className="form-container" data-testid="form-container">
+              <form onSubmit={ handleSubmit } data-testid="form">
                 <h4 className="title">USER PROFILE</h4>
                 <div className="mb-3">
                   <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={ name }
+                    onChange={ (e) => setName(e.target.value) }
                     className="form-control"
                     id="exampleInputEmail1"
                     placeholder="Enter Your Name"
@@ -74,19 +77,19 @@ const Profile = () => {
                 <div className="mb-3">
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={ email }
+                    onChange={ (e) => setEmail(e.target.value) }
                     className="form-control"
                     id="exampleInputEmail1"
-                    placeholder="Enter Your Email "
+                    placeholder="Enter Your Email"
                     disabled
                   />
                 </div>
                 <div className="mb-3">
                   <input
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={ password }
+                    onChange={ (e) => setPassword(e.target.value) }
                     className="form-control"
                     id="exampleInputPassword1"
                     placeholder="Enter Your Password"
@@ -95,8 +98,8 @@ const Profile = () => {
                 <div className="mb-3">
                   <input
                     type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    value={ phone }
+                    onChange={ (e) => setPhone(e.target.value) }
                     className="form-control"
                     id="exampleInputEmail1"
                     placeholder="Enter Your Phone"
@@ -105,10 +108,10 @@ const Profile = () => {
                 <div className="mb-3">
                   <input
                     type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    value={ address }
+                    onChange={ (e) => setAddress(e.target.value) }
                     className="form-control"
-                    id="exampleInputEmail1"
+                    id="exampleInputEmail1" // TODO: Change these id names to reflect better?
                     placeholder="Enter Your Address"
                   />
                 </div>
