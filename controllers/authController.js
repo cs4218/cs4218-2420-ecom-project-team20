@@ -1,5 +1,6 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
+import { emailValidation } from "../validation/emailValidation.js";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
@@ -25,6 +26,13 @@ export const registerController = async (req, res) => {
     }
     if (!answer) {
       return res.send({ message: "Answer is Required" });
+    }
+
+    if (!emailValidation(email)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid Email",
+      });
     }
     //check user
     const exisitingUser = await userModel.findOne({ email });
