@@ -102,7 +102,7 @@ describe("Create Category Controller Test", () => {
       error: expect.any(Error),
       message: "Errro in Category"
     });
-  })
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -230,6 +230,15 @@ describe("Delete Category Controller Test", () => {
       error: expect.any(Error),
       message: "error while deleting category"
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  afterAll(() => {
+    jest.resetModules();
   });
 })
 
