@@ -28,6 +28,11 @@ describe("Category Controller Tests", () => {
       send: jest.fn(),
     };
 
+    categoryModel.findOne = jest.fn();
+    categoryModel.find = jest.fn();
+    categoryModel.findByIdAndUpdate = jest.fn();
+    categoryModel.findByIdAndDelete = jest.fn();
+
     slugify.mockImplementation((str) => `${str}-slug`);
   });
 
