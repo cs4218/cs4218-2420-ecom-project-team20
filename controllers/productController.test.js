@@ -23,11 +23,28 @@ jest.mock("../models/productModel.js", () => {
   mockConstructor.save = jest.fn();
   return mockConstructor;
 });
+jest.mock("braintree", () => {
+    return {
+      BraintreeGateway: jest.fn().mockImplementation(() => {
+        return {
+          clientToken: {
+            generate: jest.fn(),
+          },
+          transaction: {
+            sale: jest.fn(),
+          },
+        };
+      }),
+      Environment: {
+        Sandbox: "sandbox",
+      },
+    };
+  });
+  
 jest.mock("slugify");
 jest.mock("fs", () => {
-    readFileSync = jest.fn();
-})
-
+    readFileSync = jest.fn().mockReturnThis();
+});
 jest.mock("mongoose", () => ({
   models: {},
   model: jest.fn(),
@@ -125,4 +142,8 @@ describe("Product Controller Test", () => {
       spy.mockRestore();
     });
   });
+
+  describe("updateProductController", () => {
+
+  })
 });
