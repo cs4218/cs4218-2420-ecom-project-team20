@@ -3,7 +3,8 @@ import AdminMenu from "../../components/AdminMenu";
 import Layout from "./../../components/Layout";
 import { useAuth } from "../../context/auth";
 const AdminDashboard = () => {
-  const [auth] = useAuth();
+  const authResult = useAuth();
+  const auth = authResult?.[0] || { user: {} };
   return (
     <Layout>
       <div className="container-fluid m-3 p-3">
