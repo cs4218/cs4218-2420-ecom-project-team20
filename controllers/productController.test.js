@@ -2,28 +2,14 @@ import {
   createProductController,
   updateProductController,
   deleteProductController,
+  getProductController,
 } from "./productController.js";
 import productModel from "../models/productModel.js";
-import mongoose from "mongoose";
 import slugify from "slugify";
 import fs from "fs";
 import braintree from "braintree";
 
-jest.mock("../models/productModel.js", () => {
-  const mockConstructor = jest.fn().mockImplementation(function (data) {
-    return {
-      ...data,
-      photo: { },
-      save: jest.fn().mockResolvedValue({...data, photo: {}}),
-    };
-  });
-  mockConstructor.findOne = jest.fn();
-  mockConstructor.findByIdAndUpdate = jest.fn();
-  mockConstructor.findByIdAndDelete = jest.fn();
-  mockConstructor.create = jest.fn();
-  mockConstructor.save = jest.fn();
-  return mockConstructor;
-});
+jest.mock("../models/productModel.js");
 jest.mock("braintree", () => {
   return {
     BraintreeGateway: jest.fn().mockImplementation(() => {
@@ -46,18 +32,8 @@ jest.mock("slugify");
 jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mock-photo-data"),
 }));
-jest.mock("mongoose", () => ({
-  models: {},
-  model: jest.fn(),
-  Schema: jest.fn(),
-  Types: {
-    ObjectId: jest.fn(() => "mock-object-id"),
-  },
-  connect: jest.fn(),
-  connection: { close: jest.fn() },
-}));
 
-describe("Product Controller Test", () => {
+describe("Product Controller CRUD Test", () => {
   let req, res;
 
   beforeEach(() => {
@@ -65,8 +41,21 @@ describe("Product Controller Test", () => {
     jest.useFakeTimers();
 
     req = {
-      fields: {},
-      files: {},
+      fields: {
+        name: "Test Product",
+        description: "This is description of test product",
+        price: 99.99,
+        category: "test-object-id",
+        quantity: 10,
+        shipping: true,
+      },
+      files: {
+        photo: {
+          size: 1000000,
+          path: "../client/public/photo.jpg",
+          type: "image/jpeg",
+        },
+      },
     };
 
     res = {
@@ -78,28 +67,80 @@ describe("Product Controller Test", () => {
   });
 
   describe("createProductController", () => {
+    it("should return error if name is not provided", async () => {
+      req.fields.name = null;
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        error: "Name is Required",
+      });
+    });
+
+    it("should return error if description is not provided", async () => {
+      req.fields.description = null;
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        error: "Description is Required",
+      });
+    });
+
+    it("should return error if category is not provided", async () => {
+      req.fields.category = null;
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        error: "Category is Required",
+      });
+    });
+
+    it("should return error if quantity is not provided", async () => {
+      req.fields.quantity = null;
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        error: "Quantity is Required",
+      });
+    });
+
+    it("should return error if photo is larger than 1 MB", async () => {
+      req.files.photo.size = 1000001;
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        error: "photo is Required and should be less then 1mb",
+      });
+    });
+
+    it("should return error if price is not provided", async () => {
+      req.fields.price = null;
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        error: "Price is Required",
+      });
+    });
+
     it("should successfully create a new product", async () => {
-      req.fields = {
-        name: "Test Product",
-        description: "This is description of test product",
-        price: 99.99,
-        category: mongoose.Types.ObjectId(),
-        quantity: 10,
-        shipping: true,
-      };
-      req.files = {
-        photo: {
-          size: 300000,
-          path: "../client/public/photo.jpg",
-          type: "image/jpeg",
-        },
-      };
+      req.fields.category;
       const mockProduct = new productModel({
         ...req.fields,
         slug: slugify("Test Product"),
         photo: {
-            data: "mock-photo-data",
-            contentType: "image/jpeg",
+          data: "mock-photo-data",
+          contentType: "image/jpeg",
         },
       });
 
@@ -119,21 +160,6 @@ describe("Product Controller Test", () => {
     });
 
     it("should handle errors", async () => {
-      req.fields = {
-        name: "Test Product",
-        description: "This is description of test product",
-        price: 99.99,
-        category: mongoose.Types.ObjectId(),
-        quantity: 10,
-        shipping: true,
-      };
-      req.files = {
-        photo: {
-          size: 300000,
-          path: "../client/public/photo.jpg",
-          type: "image/jpeg",
-        },
-      };
       const mockError = new Error("Database Error");
       const spy = jest.spyOn(console, "log");
 
@@ -153,5 +179,67 @@ describe("Product Controller Test", () => {
     });
   });
 
-  describe("updateProductController", () => {});
+  describe("getProductController", () => {
+    it("should successfully get all products", async () => {
+      const mockProductsList = [
+        {
+          name: "Test Product 1",
+          slug: slugify("Test Product 1"),
+          description: "This is test product 1",
+          price: 100,
+          category: "test-object-id",
+          quantity: 2,
+          photo: {},
+          shipping: true,
+        },
+        {
+          name: "Test Product 2",
+          slug: slugify("Test Product 2"),
+          description: "This is test product 2",
+          price: 20,
+          category: "test-object-id",
+          quantity: 5,
+          photo: {},
+          shipping: false,
+        },
+      ];
+      productModel.find.mockResolvedValue(mockProductsList);
+
+      await getProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        counTotal: mockProductsList.length,
+        message: "ALlProducts",
+        product: mockProductsList,
+      });
+    });
+  });
+
+  describe("getSingleProductController", () => {
+    it("should successfully get one product", async () => {
+      req.params = { slug: "test-single-product" };
+      const mockProduct = {
+        name: "Test Product 1",
+        slug: "test-single-product",
+        description: "This is test product 1",
+        price: 100,
+        category: "test-object-id",
+        quantity: 2,
+        photo: {},
+        shipping: true,
+      };
+      productModel.findOne.mockResolvedValue(mockProduct);
+
+      await getProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        message: "Single Product Fetched",
+        product: mockProduct,
+      });
+    });
+  });
 });
