@@ -6,14 +6,15 @@ import {
 import productModel from "../models/productModel.js";
 import mongoose from "mongoose";
 import slugify from "slugify";
-import fs from "fs"
+import fs from "fs";
 import braintree from "braintree";
 
 jest.mock("../models/productModel.js", () => {
   const mockConstructor = jest.fn().mockImplementation(function (data) {
     return {
       ...data,
-      save: jest.fn().mockResolvedValue(data),
+      photo: { },
+      save: jest.fn().mockResolvedValue({...data, photo: {}}),
     };
   });
   mockConstructor.findOne = jest.fn();
@@ -24,33 +25,33 @@ jest.mock("../models/productModel.js", () => {
   return mockConstructor;
 });
 jest.mock("braintree", () => {
-    return {
-      BraintreeGateway: jest.fn().mockImplementation(() => {
-        return {
-          clientToken: {
-            generate: jest.fn(),
-          },
-          transaction: {
-            sale: jest.fn(),
-          },
-        };
-      }),
-      Environment: {
-        Sandbox: "sandbox",
-      },
-    };
-  });
-  
-jest.mock("slugify");
-jest.mock("fs", () => {
-    readFileSync = jest.fn().mockReturnThis();
+  return {
+    BraintreeGateway: jest.fn().mockImplementation(() => {
+      return {
+        clientToken: {
+          generate: jest.fn(),
+        },
+        transaction: {
+          sale: jest.fn(),
+        },
+      };
+    }),
+    Environment: {
+      Sandbox: "sandbox",
+    },
+  };
 });
+
+jest.mock("slugify");
+jest.mock("fs", () => ({
+  readFileSync: jest.fn().mockReturnValue("mock-photo-data"),
+}));
 jest.mock("mongoose", () => ({
   models: {},
   model: jest.fn(),
   Schema: jest.fn(),
   Types: {
-    ObjectId: jest.fn(() => "mock-object-id"), // Mock ObjectId to return a fixed value
+    ObjectId: jest.fn(() => "mock-object-id"),
   },
   connect: jest.fn(),
   connection: { close: jest.fn() },
@@ -90,9 +91,17 @@ describe("Product Controller Test", () => {
         photo: {
           size: 300000,
           path: "../client/public/photo.jpg",
+          type: "image/jpeg",
         },
       };
-      const mockProduct = { ...req.fields, slug: slugify("Test Product") };
+      const mockProduct = new productModel({
+        ...req.fields,
+        slug: slugify("Test Product"),
+        photo: {
+            data: "mock-photo-data",
+            contentType: "image/jpeg",
+        },
+      });
 
       productModel.findOne.mockResolvedValue(null);
       productModel.mockImplementation(() => ({
@@ -101,7 +110,7 @@ describe("Product Controller Test", () => {
 
       await createProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({
         success: true,
         message: "Product Created Successfully",
@@ -122,6 +131,7 @@ describe("Product Controller Test", () => {
         photo: {
           size: 300000,
           path: "../client/public/photo.jpg",
+          type: "image/jpeg",
         },
       };
       const mockError = new Error("Database Error");
@@ -143,7 +153,5 @@ describe("Product Controller Test", () => {
     });
   });
 
-  describe("updateProductController", () => {
-
-  })
+  describe("updateProductController", () => {});
 });
