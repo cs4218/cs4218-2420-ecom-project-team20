@@ -20,15 +20,15 @@ const Contact = () => {
           <p className="text-justify mt-2">
             For any query or info about product, feel free to call anytime. We are available 24X7.
           </p>
-          <p className="mt-3">
+          <p className="mt-3" data-testid="contact-email">
             www.help@ecommerceapp.com
             {/*<BiMailSend /> : www.help@ecommerceapp.com*/}
           </p>
-          <p className="mt-3">
+          <p className="mt-3" data-testid="contact-phone1">
             012-3456789
             {/*<BiPhoneCall /> : 012-3456789*/}
           </p>
-          <p className="mt-3">
+          <p className="mt-3" data-testid="contact-phone2">
             1800-0000-0000 (toll free)
             {/*<BiSupport /> : 1800-0000-0000 (toll free)*/}
           </p>
