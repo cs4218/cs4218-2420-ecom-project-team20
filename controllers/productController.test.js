@@ -3,6 +3,7 @@ import {
   updateProductController,
   deleteProductController,
   getProductController,
+  getSingleProductController,
 } from "./productController.js";
 import productModel from "../models/productModel.js";
 import slugify from "slugify";
@@ -53,6 +54,7 @@ describe("Product Controller CRUD Test", () => {
         photo: {
           size: 1000000,
           path: "../client/public/photo.jpg",
+          data: "mock-photo-data",
           type: "image/jpeg",
         },
       },
@@ -134,30 +136,43 @@ describe("Product Controller CRUD Test", () => {
     });
 
     it("should successfully create a new product", async () => {
-      req.fields.category;
-      const mockProduct = new productModel({
+      const mockProduct = {
         ...req.fields,
         slug: slugify("Test Product"),
         photo: {
           data: "mock-photo-data",
           contentType: "image/jpeg",
         },
+      };
+    
+
+      productModel.mockImplementation(() => {
+        return {
+          ...req.fields,
+          slug: slugify("Test Product"),
+          photo: {
+            data: "mock-photo-data",
+            contentType: "image/jpeg",
+          },
+        };
       });
-
-      productModel.findOne.mockResolvedValue(null);
-      productModel.mockImplementation(() => ({
-        save: jest.fn().mockResolvedValue(mockProduct),
-      }));
-
+    
+      fs.readFileSync.mockReturnValue("mock-photo-data");
+    
       await createProductController(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
+    
+      expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith({
         success: true,
         message: "Product Created Successfully",
-        mockProduct,
+        products: mockProduct,
       });
+    
+      expect(fs.readFileSync).toHaveBeenCalledWith(req.files.photo.path);
+    
+      expect(mockSave).toHaveBeenCalled();
     });
+
 
     it("should handle errors", async () => {
       const mockError = new Error("Database Error");
@@ -203,16 +218,22 @@ describe("Product Controller CRUD Test", () => {
           shipping: false,
         },
       ];
-      productModel.find.mockResolvedValue(mockProductsList);
+
+      productModel.find.mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockProductsList),
+      });
 
       await getProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith({
         success: true,
         counTotal: mockProductsList.length,
-        message: "ALlProducts",
-        product: mockProductsList,
+        message: "ALlProducts ",
+        products: mockProductsList,
       });
     });
   });
@@ -230,11 +251,15 @@ describe("Product Controller CRUD Test", () => {
         photo: {},
         shipping: true,
       };
-      productModel.findOne.mockResolvedValue(mockProduct);
 
-      await getProductController(req, res);
+      productModel.findOne.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockResolvedValue(mockProduct),
+      });
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      await getSingleProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith({
         success: true,
         message: "Single Product Fetched",
