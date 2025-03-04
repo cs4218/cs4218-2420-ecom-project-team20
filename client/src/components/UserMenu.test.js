@@ -6,6 +6,7 @@ import "@testing-library/jest-dom/extend-expect";
 import UserMenu from './UserMenu';
 
 describe('UserMenu', () => {
+  // testing the display of the page
   it('renders heading', () => {
     render(
       <MemoryRouter>
@@ -15,6 +16,7 @@ describe('UserMenu', () => {
     expect(screen.getByRole('heading', { name: "Dashboard" })).toBeInTheDocument();
   });
 
+  // testing that the links to Profile and Orders are rendered
   it('renders link to Profile page', () => {
     render(
       <MemoryRouter>

@@ -27,17 +27,11 @@ const Profile = () => {
   }, [auth?.user]);
 
   // form function
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, updatedData) => {
     e.preventDefault();
     try {
-      const { data } = await axios.put("/api/v1/auth/profile", {
-        name,
-        email,
-        password,
-        phone,
-        address,
-      });
-      if (data?.errro) {
+      const { data } = await axios.put("/api/v1/auth/profile", updatedData);
+      if (data?.error) {
         toast.error(data?.error);
       } else {
         setAuth({ ...auth, user: data?.updatedUser });
@@ -61,7 +55,16 @@ const Profile = () => {
           </div>
           <div className="col-md-9">
             <div className="form-container" data-testid="form-container">
-              <form onSubmit={ handleSubmit } data-testid="form">
+              <form
+                onSubmit={ (e) =>
+                  handleSubmit(e, {
+                    name,
+                    email,
+                    password,
+                    phone,
+                    address,
+                  }) }
+                data-testid="form">
                 <h4 className="title">USER PROFILE</h4>
                 <div className="mb-3">
                   <input

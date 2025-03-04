@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import axios from "axios";
+import { fireEvent, getByPlaceholderText, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import "@testing-library/jest-dom/extend-expect";
 
@@ -11,6 +12,14 @@ const testUser = {
   password: "johnsmithpw",
   phone: "0123456789",
   address: "10 Apple Street",
+};
+
+const newUser = {
+  name: "Jane Smith",
+  email: "janesmith@email.com",
+  password: "janesmithpw",
+  phone: "9876543210",
+  address: "10 Pear Street",
 };
 
 jest.mock("../../context/auth", () => ({
@@ -28,14 +37,12 @@ jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
 }));
 
-// set a testUser to use for auth
-
 describe("Profile", () => {
-  // testing display of page
+  // testing the display of the page
   it('renders heading', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     expect(screen.getByRole('heading', { name: "USER PROFILE" })).toBeInTheDocument();
@@ -43,7 +50,7 @@ describe("Profile", () => {
   it('renders form', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     expect(screen.getByTestId("form-container")).toBeInTheDocument();
@@ -54,29 +61,27 @@ describe("Profile", () => {
   it('initially renders original name of user', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     const initialName = screen.getByPlaceholderText("Enter Your Name");
     expect(initialName).toBeInTheDocument();
     expect(initialName.value).toEqual(testUser.name);
   });
-
   it('initially renders original email of user', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     const initialEmail = screen.getByPlaceholderText("Enter Your Email");
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail.value).toEqual(testUser.email);
   });
-
   it('does not display original password of user', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     const initialPassword = screen.getByPlaceholderText("Enter Your Password");
@@ -84,22 +89,20 @@ describe("Profile", () => {
     expect(initialPassword.value).toEqual("");
     expect(initialPassword.value).toHaveLength(0);
   });
-
   it('initially renders original phone of user', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     const initialPhone = screen.getByPlaceholderText("Enter Your Phone");
     expect(initialPhone).toBeInTheDocument();
     expect(initialPhone.value).toEqual(testUser.phone);
   });
-
   it('initially renders original address of user', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     const initialAddress = screen.getByPlaceholderText("Enter Your Address");
@@ -111,14 +114,61 @@ describe("Profile", () => {
   it('does not allow changing email of user', () => {
     render(
       <MemoryRouter>
-        <Profile />
+        <Profile/>
       </MemoryRouter>
     );
     const initialEmail = screen.getByPlaceholderText("Enter Your Email");
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail).toBeDisabled();
   });
-});
 
-// test form function with axios.put
-// test that the values change after submitting the form
+  // testing the handleSubmit() function with axios.put
+  it('handles form submission when password included', async () => {
+    axios.put.mockResolvedValue({ data: newUser });
+    render(
+      <MemoryRouter>
+        <Profile/>
+      </MemoryRouter>
+    );
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: newUser.name },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+      target: { value: newUser.email },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+      target: { value: newUser.password },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
+      target: { value: newUser.phone },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
+      target: { value: newUser.address },
+    });
+
+    fireEvent.click(screen.getByText("UPDATE"));
+    await waitFor(() => expect(axios.put).toHaveBeenCalled());
+    expect(axios.put).toHaveBeenCalled();
+  });
+  it('does not allow form submission when password is not included', async () => {
+    render(
+      <MemoryRouter>
+        <Profile/>
+      </MemoryRouter>
+    );
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: newUser.name },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Email"), {
+      target: { value: newUser.email },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
+      target: { value: newUser.phone },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
+      target: { value: newUser.address },
+    });
+    fireEvent.click(screen.getByText("UPDATE"));
+    await waitFor(() => expect(axios.put).toHaveBeenCalled());
+  });
+});
