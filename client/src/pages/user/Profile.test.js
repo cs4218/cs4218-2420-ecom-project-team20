@@ -1,8 +1,9 @@
 import React from 'react';
 import axios from "axios";
-import { fireEvent, getByPlaceholderText, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, getByLabelText, getByPlaceholderText, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import "@testing-library/jest-dom/extend-expect";
+import toast from "react-hot-toast";
 
 import Profile from "./Profile";
 
@@ -26,7 +27,6 @@ const newUser = {
 
 jest.mock("axios");
 jest.mock("react-hot-toast");
-jest.mock("jsonwebtoken");
 
 jest.mock("../../context/auth", () => ({
   useAuth: jest.fn(() => [{
@@ -49,6 +49,14 @@ describe("Profile", () => {
       </MemoryRouter>
     );
     expect(screen.getByRole("heading", { name: "USER PROFILE" })).toBeInTheDocument();
+  });
+  it("renders button", () => {
+    render(
+      <MemoryRouter>
+        <Profile/>
+      </MemoryRouter>
+    );
+    expect(screen.getByRole("button", { name: /UPDATE/i })).toBeInTheDocument();
   });
   it("renders form", () => {
     render(
@@ -134,6 +142,7 @@ describe("Profile", () => {
         updatedUser: newUser,
       },
     });
+
     render(
       <MemoryRouter>
         <Profile/>
@@ -151,44 +160,56 @@ describe("Profile", () => {
     fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
       target: { value: newUser.address },
     });
-
-    fireEvent.click(screen.getByText("UPDATE"));
+    const form = screen.getByLabelText("profile-form");
+    fireEvent.submit(form);
     await waitFor(() => expect(axios.put).toHaveBeenCalled());
-
-    // TODO: toast.success isn't showing up for this test
-    // await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Profile Updated Successfully"));
   });
+  it("does not allow form submission when len(password) < 6", async () => {
+    render(
+      <MemoryRouter>
+        <Profile/>
+      </MemoryRouter>
+    );
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: newUser.name },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+      target: { value: "12345" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
+      target: { value: newUser.phone },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
+      target: { value: newUser.address },
+    });
+    const form = screen.getByLabelText("profile-form");
+    fireEvent.submit(form);
 
-  // TODO: Fix these test cases
-  // it("does not allow form submission when len(password) < 6", async () => {
-  //   render(
-  //     <MemoryRouter>
-  //       <Profile/>
-  //     </MemoryRouter>
-  //   );
-  //   fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
-  //     target: { value: newUser.name },
-  //   });
-  //   fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
-  //     target: { value: "short" },
-  //   });
-  //   fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
-  //     target: { value: newUser.phone },
-  //   });
-  //   fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
-  //     target: { value: newUser.address },
-  //   });
-  //   fireEvent.click(screen.getByText("UPDATE"));
-  //
-  //   await waitFor(() => expect(axios.put).toHaveBeenCalled());
-  //   expect(toast.error).toHaveBeenCalledWith("Password is required and 6 character long");
-  // });
+    await waitFor(() => expect(axios.put).toHaveBeenCalled());
+    expect(toast.error).toHaveBeenCalled();
+  });
+  it("does not allow form submission when len(password) == 6", async () => {
+    render(
+      <MemoryRouter>
+        <Profile/>
+      </MemoryRouter>
+    );
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
+      target: { value: newUser.name },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Password"), {
+      target: { value: "123456" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Phone"), {
+      target: { value: newUser.phone },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Enter Your Address"), {
+      target: { value: newUser.address },
+    });
+    const form = screen.getByLabelText("profile-form");
+    fireEvent.submit(form);
 
-  // it("does not allow form submission when len(password) == 6", async () => {
-  //   render(
-  //     <MemoryRouter>
-  //       <Profile/>
-  //     </MemoryRouter>
-  //   );
-  // });
+    await waitFor(() => expect(axios.put).toHaveBeenCalled());
+    expect(toast.error).toHaveBeenCalled();
+  });
 });

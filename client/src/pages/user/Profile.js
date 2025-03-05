@@ -27,10 +27,16 @@ const Profile = () => {
   }, [auth?.user]);
 
   // form function
-  const handleSubmit = async (e, updatedData) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.put("/api/v1/auth/profile", updatedData);
+      const { data } = await axios.put("/api/v1/auth/profile", {
+        name,
+        email,
+        password,
+        phone,
+        address,
+      });
       if (data?.error) {
         toast.error(data?.error);
       } else {
@@ -46,6 +52,7 @@ const Profile = () => {
       toast.error("Something went wrong");
     }
   };
+
   return (
     <Layout title={ "Your Profile" }>
       <div className="container-fluid m-3 p-3">
@@ -64,7 +71,8 @@ const Profile = () => {
                     phone,
                     address,
                   }) }
-                data-testid="form">
+                data-testid="form"  // TODO: Change name of testid
+                aria-label="profile-form">
                 <h4 className="title">USER PROFILE</h4>
                 <div className="mb-3">
                   <input
@@ -114,7 +122,7 @@ const Profile = () => {
                     value={ address }
                     onChange={ (e) => setAddress(e.target.value) }
                     className="form-control"
-                    id="exampleInputEmail1" // TODO: Change these id names to reflect better?
+                    id="exampleInputEmail1"
                     placeholder="Enter Your Address"
                   />
                 </div>
