@@ -24,7 +24,7 @@ jest.mock("../../context/search", () => ({
 }));
 
 describe("Users", () => {
-  it('renders heading', () => {
+  it("renders heading", () => {
     render(
       <MemoryRouter>
         <Users />
