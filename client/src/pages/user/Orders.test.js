@@ -16,16 +16,16 @@ const testUser = {
 
 const mockOrders = [
   {
-    _id: "1",
+    _id: 1,
     products: [
       {
-        _id: "1",
+        _id: 1,
         name: "Product 1",
         description: "Description 1",
         price: 1,
       },
       {
-        _id: "2",
+        _id: 2,
         name: "Product 2",
         description: "Description 2",
         price: 2,
@@ -38,16 +38,16 @@ const mockOrders = [
     updatedAt: Date.now() - (24 * 60 * 60),
   },
   {
-    _id: "2",
+    _id: 2,
     products: [
       {
-        _id: "3",
+        _id: 3,
         name: "Product 3",
         description: "Description 3",
         price: 3,
       },
       {
-        _id: "4",
+        _id: 4,
         name: "Product 4",
         description: "Description 4",
         price: 4,
@@ -64,10 +64,10 @@ const mockOrders = [
     updatedAt: Date.now() - (24 * 60 * 60),
   },
   {
-    _id: "3",
+    _id: 3,
     products: [
       {
-        _id: "5",
+        _id: 5,
         name: "Product 5",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam nec pharetra nisi. Nunc vehicula metus a nulla pulvinar, non fringilla nulla maximus. Donec posuere condimentum neque, non sollicitudin felis elementum nec. Donec eu diam vel mi ornare dictum ac facilisis libero. Curabitur id eros non neque rutrum commodo ut vel massa. Fusce fermentum egestas urna consequat feugiat. Cras id porttitor velit, sed condimentum nisi. Maecenas eleifend fringilla sagittis. Nulla facilisi. Ut vestibulum, neque ut vehicula iaculis, lacus augue sagittis turpis, rutrum dapibus lacus arcu sit amet erat.\n",
         price: 5,
