@@ -20,7 +20,7 @@ module.exports = {
   transformIgnorePatterns: ["/node_modules/(?!(styleMock\\.js)$)"],
 
   // only run these tests
-  testMatch: ["<rootDir>/client/src/components/Form/CategoryForm.test.js"],
+  testMatch: ["<rootDir>/client/src/context/auth.test.js"],
 
   // jest code coverage
   // collectCoverage: true,
