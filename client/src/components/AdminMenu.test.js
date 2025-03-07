@@ -1,18 +1,18 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import AdminMenu from "./AdminMenu";
 import "@testing-library/jest-dom";
 
-describe("AdminMenu Component", () => {
-  const setup = (initialRoute) => {
-    return render(
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <AdminMenu />
-      </MemoryRouter>
-    );
-  };
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: jest.fn(),
+}));
 
+describe("AdminMenu Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it("renders all admin links correctly", () => {
     const { getByText } = render(
       <MemoryRouter initialEntries={["/dashboard/admin"]}>
@@ -56,23 +56,79 @@ describe("AdminMenu Component", () => {
     );
   });
 
-  it("applies 'active' class to 'Create Category' when on that route", () => {
-    const { getByText } = setup("/dashboard/admin/create-category");
-    expect(getByText("Create Category")).toHaveClass("active");
+  it("navigates to Create Category page when it is clicked", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<AdminMenu />} />
+          <Route
+            path="/dashboard/admin/create-category"
+            element={<div>Create Category Page</div>}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const createCategoryLink = getByText(/Create Category/i);
+    fireEvent.click(createCategoryLink);
+
+    expect(getByText("Create Category Page")).toBeInTheDocument();
   });
 
-  it("applies 'active' class to 'Create Product' when on that route", () => {
-    const { getByText } = setup("/dashboard/admin/create-product");
-    expect(getByText("Create Product")).toHaveClass("active");
+  it("navigates to Create Product page when it is clicked", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<AdminMenu />} />
+          <Route
+            path="/dashboard/admin/create-product"
+            element={<div>Create Product Page</div>}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const createCategoryLink = getByText(/Create Product/i);
+    fireEvent.click(createCategoryLink);
+
+    expect(getByText("Create Product Page")).toBeInTheDocument();
   });
 
-  it("applies 'active' class to 'Products' when on that route", () => {
-    const { getByText } = setup("/dashboard/admin/products");
-    expect(getByText("Products")).toHaveClass("active");
+  it("navigates to Products page when it is clicked", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<AdminMenu />} />
+          <Route
+            path="/dashboard/admin/products"
+            element={<div>Products Page</div>}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const createCategoryLink = getByText(/Products/i);
+    fireEvent.click(createCategoryLink);
+
+    expect(getByText("Products Page")).toBeInTheDocument();
   });
 
-  it("applies 'active' class to 'Orders' when on that route", () => {
-    const { getByText } = setup("/dashboard/admin/orders");
-    expect(getByText("Orders")).toHaveClass("active");
+  it("navigates to Order page when it is clicked", () => {
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<AdminMenu />} />
+          <Route
+            path="/dashboard/admin/orders"
+            element={<div>Orders Page</div>}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const createCategoryLink = getByText(/Orders/i);
+    fireEvent.click(createCategoryLink);
+
+    expect(getByText("Orders Page")).toBeInTheDocument();
   });
 });
