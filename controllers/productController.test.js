@@ -143,20 +143,11 @@ describe("Product Controller CRUD Test", () => {
           data: "mock-photo-data",
           contentType: "image/jpeg",
         },
+        save: jest.fn().mockResolvedValue(true),
       };
-    
 
-      productModel.mockImplementation(() => {
-        return {
-          ...req.fields,
-          slug: slugify("Test Product"),
-          photo: {
-            data: "mock-photo-data",
-            contentType: "image/jpeg",
-          },
-        };
-      });
-    
+      productModel.mockImplementation(() => mockProduct);
+
       fs.readFileSync.mockReturnValue("mock-photo-data");
     
       await createProductController(req, res);
@@ -170,15 +161,24 @@ describe("Product Controller CRUD Test", () => {
     
       expect(fs.readFileSync).toHaveBeenCalledWith(req.files.photo.path);
     
-      expect(mockSave).toHaveBeenCalled();
+      expect(mockProduct.save).toHaveBeenCalled();
     });
-
 
     it("should handle errors", async () => {
       const mockError = new Error("Database Error");
       const spy = jest.spyOn(console, "log");
 
-      productModel.findOne.mockRejectedValue(mockError);
+      const mockProduct = {
+        ...req.fields,
+        slug: slugify("Test Product"),
+        photo: {
+          data: "mock-photo-data",
+          contentType: "image/jpeg",
+        },
+        save: jest.fn().mockRejectedValue(mockError),
+      };
+
+      productModel.mockImplementation(() => mockProduct)
 
       await createProductController(req, res);
 
