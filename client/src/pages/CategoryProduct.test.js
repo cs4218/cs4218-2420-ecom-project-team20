@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import "@testing-library/jest-dom/extend-expect";
 import axios from "axios";
 
@@ -75,7 +75,16 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockUseNavigate,
 }))
 jest.mock("axios");
-jest.mock("../components/layout", () => ({ children }) => <div>{ children }</div>);
+jest.mock("../context/auth", () => ({
+  useAuth: jest.fn(() => [null, jest.fn()]),
+}));
+jest.mock("../context/cart", () => ({
+  useCart: jest.fn(() => [null, jest.fn()]),
+}));
+jest.mock("../context/search", () => ({
+  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
+}));
+jest.mock("../hooks/useCategory", () => jest.fn(() => []));
 
 describe("CategoryProduct", () => {
   const renderComponent = (slug) => {

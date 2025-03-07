@@ -45,7 +45,16 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockUseNavigate,
 }));
 jest.mock("axios");
-jest.mock("../components/layout", () => ({ children }) => <div>{ children }</div>);
+jest.mock("../context/auth", () => ({
+  useAuth: jest.fn(() => [null, jest.fn()]),
+}));
+jest.mock("../context/cart", () => ({
+  useCart: jest.fn(() => [null, jest.fn()]),
+}));
+jest.mock("../context/search", () => ({
+  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
+}));
+jest.mock("../hooks/useCategory", () => jest.fn(() => []));
 
 describe("ProductDetails", () => {
   const renderComponent = (slug) => {

@@ -5,18 +5,16 @@ import "@testing-library/jest-dom/extend-expect";
 
 import Contact from "./Contact";
 
-const testUser = {
-  name: "John Smith",
-  email: "johnsmith@email.com",
-  address: "10 Apple Street"
-};
-
 jest.mock("../context/auth", () => ({
-  useAuth: jest.fn(() => [{
-    user: testUser,
-  }, jest.fn()]),
+  useAuth: jest.fn(() => [null, jest.fn()]),
 }));
-jest.mock("../components/Layout", () => ({ children }) => <div>{ children }</div>);
+jest.mock("../context/cart", () => ({
+  useCart: jest.fn(() => [null, jest.fn()]),
+}));
+jest.mock("../context/search", () => ({
+  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
+}));
+jest.mock("../hooks/useCategory", () => jest.fn(() => []));
 
 describe("Contact", () => {
   const renderComponent = () => {

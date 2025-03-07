@@ -14,9 +14,7 @@ const testUser = {
 };
 
 jest.mock("../../context/auth", () => ({
-  useAuth: jest.fn(() => [{
-    user: testUser
-  }, jest.fn()]),
+  useAuth: jest.fn(() => [{ user: testUser }, jest.fn()]),
 }));
 jest.mock("../../context/cart", () => ({
   useCart: jest.fn(() => [null, jest.fn()]),
@@ -24,6 +22,7 @@ jest.mock("../../context/cart", () => ({
 jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
 }));
+jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
 
 describe('Dashboard', () => {
   const renderComponent = () => {
