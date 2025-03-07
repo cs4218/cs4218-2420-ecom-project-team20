@@ -2,57 +2,40 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react";
 import axios from "axios";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import "@testing-library/jest-dom/extend-expect";
+import "@testing-library/jest-dom";
 import toast from "react-hot-toast";
 import Login from "./Login";
-import { useNavigate } from "react-router-dom";
 
-// Mocking axios.post
 jest.mock("axios");
 jest.mock("react-hot-toast");
 
-jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
-
 jest.mock("../../context/auth", () => ({
-  useAuth: jest.fn(() => [null, jest.fn()]), // Mock useAuth hook to return null state and a mock function for setAuth
+  useAuth: jest.fn().mockReturnValue([null, jest.fn()]),
 }));
 
 jest.mock("../../context/cart", () => ({
-  useCart: jest.fn(() => [null, jest.fn()]), // Mock useCart hook to return null state and a mock function
+  useCart: jest.fn().mockReturnValue([null, jest.fn()]),
 }));
+
+jest.mock("../../hooks/useCategory", () => jest.fn().mockReturnValue([]));
 
 jest.mock("../../context/search", () => ({
-  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
+  useSearch: jest.fn().mockReturnValue([{ keyword: "" }, jest.fn()]),
 }));
 
-// Mocking react-router-dom's useNavigate hook
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(),
 }));
 
-Object.defineProperty(window, "localStorage", {
-  value: {
-    setItem: jest.fn(),
-    getItem: jest.fn(),
-    removeItem: jest.fn(),
-  },
-  writable: true,
-});
-
-window.matchMedia =
-  window.matchMedia ||
-  function () {
-    return {
-      matches: false,
-      addListener: function () {},
-      removeListener: function () {},
-    };
-  };
-
 describe("Login Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("renders login form", () => {
@@ -86,7 +69,7 @@ describe("Login Component", () => {
   it("should navigate to forgot password page", () => {
     const mockNavigate = jest.fn();
     require("react-router-dom").useNavigate.mockReturnValue(mockNavigate);
-    const { getByText } = render(
+    const { getByRole } = render(
       <MemoryRouter initialEntries={["/login"]}>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -95,13 +78,13 @@ describe("Login Component", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(getByText("Forgot Password"));
+    fireEvent.click(getByRole("button", { name: "Forgot Password" }));
 
     expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
   });
 
   it("should allow typing email and password", () => {
-    const { getByText, getByPlaceholderText } = render(
+    const { getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/login"]}>
         <Routes>
           <Route path="/login" element={<Login />} />
