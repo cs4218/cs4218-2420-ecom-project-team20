@@ -18,7 +18,12 @@ jest.mock("../../context/auth", () => ({
     user: testUser
   }, jest.fn()]),
 }));
-jest.mock("../../components/layout", () => ({ children }) => <div>{ children }</div>);
+jest.mock("../../context/cart", () => ({
+  useCart: jest.fn(() => [null, jest.fn()]),
+}));
+jest.mock("../../context/search", () => ({
+  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
+}));
 
 describe('Dashboard', () => {
   const renderComponent = () => {

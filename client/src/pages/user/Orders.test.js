@@ -94,7 +94,9 @@ jest.mock("../../context/auth", () => ({
 jest.mock("../../context/cart", () => ({
   useCart: jest.fn(() => [null, jest.fn()]),
 }));
-jest.mock("../../components/layout", () => ({ children }) => <div>{ children }</div>);
+jest.mock("../../context/search", () => ({
+  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
+}));
 
 describe("Orders", () => {
   const renderComponent = () => {
