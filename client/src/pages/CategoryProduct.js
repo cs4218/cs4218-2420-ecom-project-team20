@@ -56,7 +56,7 @@ const CategoryProduct = () => {
                     <div className="card-name-price">
                       <button
                         className="btn btn-info ms-1"
-                        data-testid={`md-button-${p.slug}`}
+                        data-testid={`cp-button-${p.slug}`}
                         onClick={() => navigate(`/product/${p.slug}`)}
                       >
                         More Details

@@ -69,13 +69,12 @@ const mockCategoryProducts = [
   },
 ]
 
-jest.mock("axios");
-
-const mockedUsedNavigate = jest.fn();
+const mockUseNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...(jest.requireActual('react-router-dom')),
-  useNavigate: () => mockedUsedNavigate,
+  useNavigate: () => mockUseNavigate,
 }))
+jest.mock("axios");
 jest.mock("../components/layout", () => ({ children }) => <div>{ children }</div>);
 
 describe("CategoryProduct", () => {
@@ -88,7 +87,6 @@ describe("CategoryProduct", () => {
       </MemoryRouter>
     );
   };
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -141,11 +139,11 @@ describe("CategoryProduct", () => {
     renderComponent(mockCategoryProducts[0].category.slug);
 
     mockCategoryProducts[0].products.map(async (product) => {
-      const productButton = await waitFor(() => screen.getByTestId(`md-button-${ product.slug }`));
+      const productButton = await waitFor(() => screen.getByTestId(`cd-button-${ product.slug }`));
       fireEvent.click(productButton);
-      expect(mockedUsedNavigate).toBeCalledTimes(1);
-      expect(mockedUsedNavigate).toBeCalledWith(`/product/${ product.slug }`);
-      mockedUsedNavigate.mockRestore();
+      expect(mockUseNavigate).toBeCalledTimes(1);
+      expect(mockUseNavigate).toBeCalledWith(`/product/${ product.slug }`);
+      mockUseNavigate.mockRestore();
     });
   });
 });

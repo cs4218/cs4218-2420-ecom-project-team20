@@ -10,7 +10,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  //initalp details
+  // initial details
   useEffect(() => {
     if (params?.slug) getProduct();
   }, [params?.slug]);
@@ -47,21 +47,21 @@ const ProductDetails = () => {
             alt={product.name}
             height="300"
             width={"350px"}
+            data-testid={`pd-image-${product.name}`}
           />
         </div>
         <div className="col-md-6 product-details-info">
           <h1 className="text-center">Product Details</h1>
           <hr />
-          <h6>Name : {product.name}</h6>
-          <h6>Description : {product.description}</h6>
+          <h6>Name: {product.name}</h6>
+          <h6>Description: {product.description}</h6>
           <h6>
-            Price :
-            {product?.price?.toLocaleString("en-US", {
+            Price: {product?.price?.toLocaleString("en-US", {
               style: "currency",
               currency: "USD",
             })}
           </h6>
-          <h6>Category : {product?.category?.name}</h6>
+          <h6>Category: {product?.category?.name}</h6>
           <button class="btn btn-secondary ms-1">ADD TO CART</button>
         </div>
       </div>
@@ -69,7 +69,7 @@ const ProductDetails = () => {
       <div className="row container similar-products">
         <h4>Similar Products ➡️</h4>
         {relatedProducts.length < 1 && (
-          <p className="text-center">No Similar Products found</p>
+          <p className="text-center">No similar products found</p>
         )}
         <div className="d-flex flex-wrap">
           {relatedProducts?.map((p) => (
@@ -78,6 +78,7 @@ const ProductDetails = () => {
                 src={`/api/v1/product/product-photo/${p._id}`}
                 className="card-img-top"
                 alt={p.name}
+                data-testid={`pd-image-${p.name}`}
               />
               <div className="card-body">
                 <div className="card-name-price">
@@ -95,6 +96,7 @@ const ProductDetails = () => {
                 <div className="card-name-price">
                   <button
                     className="btn btn-info ms-1"
+                    data-testid={`pd-button-${p.slug}`}
                     onClick={() => navigate(`/product/${p.slug}`)}
                   >
                     More Details
