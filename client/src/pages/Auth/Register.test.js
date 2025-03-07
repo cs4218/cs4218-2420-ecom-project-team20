@@ -24,25 +24,6 @@ jest.mock("../../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
 }));
 
-Object.defineProperty(window, "localStorage", {
-  value: {
-    setItem: jest.fn(),
-    getItem: jest.fn(),
-    removeItem: jest.fn(),
-  },
-  writable: true,
-});
-
-window.matchMedia =
-  window.matchMedia ||
-  function () {
-    return {
-      matches: false,
-      addListener: function () {},
-      removeListener: function () {},
-    };
-  };
-
 describe("Register Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,7 +53,7 @@ describe("Register Component", () => {
   it("should register the user successfully", async () => {
     axios.post.mockResolvedValueOnce({ data: { success: true } });
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByPlaceholderText, getByRole } = render(
       <MemoryRouter initialEntries={["/register"]}>
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -102,18 +83,29 @@ describe("Register Component", () => {
       target: { value: "Football" },
     });
 
-    fireEvent.click(getByText("REGISTER"));
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
 
-    await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith(
-      "Register Successfully, please login"
-    );
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith("/api/v1/auth/register", {
+        name: "John Doe",
+        email: "test@example.com",
+        password: "password123",
+        phone: "1234567890",
+        address: "123 Street",
+        DOB: "2000-01-01",
+        answer: "Football",
+      });
+
+      expect(toast.success).toHaveBeenCalledWith(
+        "Register Successfully, please login"
+      );
+    });
   });
 
   it("should display error message on failed registration", async () => {
-    axios.post.mockRejectedValueOnce({ message: "User already exists" });
+    axios.post.mockRejectedValueOnce({});
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByRole, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/register"]}>
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -143,68 +135,27 @@ describe("Register Component", () => {
       target: { value: "Football" },
     });
 
-    fireEvent.click(getByText("REGISTER"));
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
   });
 
-  it("should show error toast on server error", async () => {
-    axios.post.mockRejectedValue(new Error("Network error"));
-
-    const { getByText, getByPlaceholderText } = render(
-      <MemoryRouter initialEntries={["/register"]}>
-        <Routes>
-          <Route path="/register" element={<Register />} />
-        </Routes>
-      </MemoryRouter>
-    );
-
-    fireEvent.change(getByPlaceholderText("Enter Your Name"), {
-      target: { value: "John Doe" },
-    });
-    fireEvent.change(getByPlaceholderText("Enter Your Email"), {
-      target: { value: "john@example.com" },
-    });
-    fireEvent.change(getByPlaceholderText("Enter Your Password"), {
-      target: { value: "password123" },
-    });
-    fireEvent.change(getByPlaceholderText("Enter Your Phone"), {
-      target: { value: "1234567890" },
-    });
-    fireEvent.change(getByPlaceholderText("Enter Your Address"), {
-      target: { value: "123 Main St" },
-    });
-    fireEvent.change(getByPlaceholderText("Enter Your DOB"), {
-      target: { value: "2000-01-01" },
-    });
-    fireEvent.change(getByPlaceholderText("What is Your Favorite sports"), {
-      target: { value: "Soccer" },
-    });
-
-    fireEvent.click(getByText("REGISTER"));
-
-    // Wait for toast to be called
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
-    });
-  });
-
   it("should not submit when required fields are missing", async () => {
-    const { getByText } = render(
+    const { getByRole } = render(
       <MemoryRouter initialEntries={["/register"]}>
         <Routes>
           <Route path="/register" element={<Register />} />
         </Routes>
       </MemoryRouter>
     );
-    fireEvent.click(getByText("REGISTER"));
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
 
     expect(axios.post).not.toHaveBeenCalled();
   });
 
   it("should show validation errors when required fields are missing", () => {
-    const { getByText, getByPlaceholderText } = render(
+    const { getByRole, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/register"]}>
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -212,10 +163,8 @@ describe("Register Component", () => {
       </MemoryRouter>
     );
 
-    const emailInput = getByPlaceholderText("Enter Your Email");
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
 
-    fireEvent.click(getByText("REGISTER"));
-
-    expect(emailInput).toBeInvalid();
+    expect(getByPlaceholderText("Enter Your Name")).toBeInvalid();
   });
 });
