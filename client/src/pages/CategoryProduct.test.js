@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import "@testing-library/jest-dom/extend-expect";
 import axios from "axios";
@@ -70,7 +70,7 @@ const mockCategoryProducts = [
 ]
 
 jest.mock("axios");
-jest.mock("./../components/Layout", () => ({ children }) => <div>{ children }</div>);
+jest.mock("../components/layout", () => ({ children }) => <div>{ children }</div>);
 
 describe("CategoryProduct", () => {
   const renderComponent = (slug) => {
@@ -92,12 +92,17 @@ describe("CategoryProduct", () => {
     renderComponent(mockCategoryProducts[0].category.slug);
     await waitFor(() => expect(screen.getByRole("heading", { name: `Category - ${ mockCategoryProducts[0].category.name}` })).toBeInTheDocument());
   });
-  it('renders number of results for category', async () => {
+  it("renders number of results found for the category", async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
     await waitFor(() => expect(screen.getByRole("heading", { name: `${ mockCategoryProducts[0].products.length } result found` })).toBeInTheDocument());
   });
-  it('renders products of category', async () => {
+  it('renders number of results found for the category', async () => {
+    axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
+    renderComponent(mockCategoryProducts[0].category.slug);
+    await waitFor(() => expect(screen.getByRole("heading", { name: `${ mockCategoryProducts[0].products.length } result found` })).toBeInTheDocument());
+  });
+  it('renders details for the products of the category', async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
     let expectedProducts = [];
@@ -121,13 +126,7 @@ describe("CategoryProduct", () => {
       expect(expectedProduct.price).toBeInTheDocument();
       expect(expectedProduct.description).toBeInTheDocument();
     }
-
     const productButtons = await waitFor(() => screen.getAllByRole("button", { name: "More Details" }));
     expect(productButtons.length).toEqual(mockCategoryProducts[0].products.length);
-    // TODO: Check that there's a button rendered with correct href for each product
-    // for (let i = 0; i < productButtons.length; i++) {
-    //   const productButton = productButtons[i];
-    //   expect(productButton).toHaveAttribute('href',)
-    // }
   });
 });
