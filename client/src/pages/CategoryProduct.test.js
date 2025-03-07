@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import "@testing-library/jest-dom/extend-expect";
 import axios from "axios";
 
@@ -70,12 +70,18 @@ const mockCategoryProducts = [
 ]
 
 jest.mock("axios");
+
+const mockedUsedNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom')),
+  useNavigate: () => mockedUsedNavigate,
+}))
 jest.mock("../components/layout", () => ({ children }) => <div>{ children }</div>);
 
 describe("CategoryProduct", () => {
   const renderComponent = (slug) => {
     render(
-      <MemoryRouter initialEntries={ [`/category/${slug}`] }>
+      <MemoryRouter initialEntries={ [`/category/${ slug }`] }>
         <Routes>
           <Route path="/category/:slug" element={ <CategoryProduct/> }/>
         </Routes>
@@ -90,7 +96,7 @@ describe("CategoryProduct", () => {
   it('renders heading of category', async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
-    await waitFor(() => expect(screen.getByRole("heading", { name: `Category - ${ mockCategoryProducts[0].category.name}` })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("heading", { name: `Category - ${ mockCategoryProducts[0].category.name }` })).toBeInTheDocument());
   });
   it("renders number of results found for the category", async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
@@ -105,6 +111,7 @@ describe("CategoryProduct", () => {
   it('renders details for the products of the category', async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
+
     let expectedProducts = [];
     for (let i = 0; i < mockCategoryProducts[0].products.length; i++) {
       const mockProduct = mockCategoryProducts[0].products[i];
@@ -113,7 +120,7 @@ describe("CategoryProduct", () => {
         style: "currency",
         currency: "USD",
       })));
-      const productDescription = await waitFor(() => screen.getByText(`${mockProduct.description.substring(0, 60)}...`));
+      const productDescription = await waitFor(() => screen.getByText(`${ mockProduct.description.substring(0, 60) }...`));
       expectedProducts.push({
         name: productName,
         price: productPrice,
@@ -128,5 +135,17 @@ describe("CategoryProduct", () => {
     }
     const productButtons = await waitFor(() => screen.getAllByRole("button", { name: "More Details" }));
     expect(productButtons.length).toEqual(mockCategoryProducts[0].products.length);
+  });
+  it('links buttons to relevant product detail pages', async () => {
+    axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
+    renderComponent(mockCategoryProducts[0].category.slug);
+
+    mockCategoryProducts[0].products.map(async (product) => {
+      const productButton = await waitFor(() => screen.getByTestId(`md-button-${ product.slug }`));
+      fireEvent.click(productButton);
+      expect(mockedUsedNavigate).toBeCalledTimes(1);
+      expect(mockedUsedNavigate).toBeCalledWith(`/product/${ product.slug }`);
+      mockedUsedNavigate.mockRestore();
+    });
   });
 });
