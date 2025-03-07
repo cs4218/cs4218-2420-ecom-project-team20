@@ -166,11 +166,6 @@ const CreateCategory = () => {
                 />
               </Modal>
             )}
-            <CategoryForm
-              value={updatedName}
-              setValue={setUpdatedName}
-              handleSubmit={handleUpdate}
-            />
           </div>
         </div>
       </div>
