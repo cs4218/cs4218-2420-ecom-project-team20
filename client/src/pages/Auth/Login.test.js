@@ -218,7 +218,13 @@ describe("Login Component", () => {
   });
 
   it("should display error message on failed login", async () => {
-    axios.post.mockRejectedValueOnce({});
+    axios.post.mockRejectedValueOnce({
+      response: {
+        data: {
+          message: "Invalid Password",
+        },
+      },
+    });
 
     const { getByPlaceholderText, getByText } = render(
       <MemoryRouter initialEntries={["/login"]}>
@@ -237,6 +243,6 @@ describe("Login Component", () => {
     fireEvent.click(getByText("LOGIN"));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    expect(toast.error).toHaveBeenCalledWith("Invalid Password");
   });
 });
