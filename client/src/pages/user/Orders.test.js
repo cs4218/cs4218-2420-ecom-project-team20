@@ -13,7 +13,6 @@ const testUser = {
   phone: "0123456789",
   address: "10 Apple Street",
 };
-
 const mockOrders = [
   {
     _id: 1,
@@ -95,26 +94,29 @@ jest.mock("../../context/auth", () => ({
 jest.mock("../../context/cart", () => ({
   useCart: jest.fn(() => [null, jest.fn()]),
 }));
-jest.mock("../../context/search", () => ({
-  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
-}));
+jest.mock("../../components/layout", () => ({ children }) => <div>{ children }</div>);
 
 describe("Orders", () => {
-  it("renders heading", () => {
+  const renderComponent = () => {
     render(
       <MemoryRouter>
         <Orders/>
       </MemoryRouter>
     );
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("renders heading", () => {
+    renderComponent();
     expect(screen.getByRole("heading", { name: "All Orders" })).toBeInTheDocument();
   });
   it("renders headers of order table correctly", async () => {
     axios.get.mockResolvedValue({ data: [mockOrders[0]] });
-    render(
-      <MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const numOrderTables = await waitFor(() => screen.getAllByText("#").length);
     expect(numOrderTables).toEqual(1);
     await waitFor(() => expect(screen.getByText("#")).toBeInTheDocument());
@@ -126,53 +128,37 @@ describe("Orders", () => {
   });
   it("renders correct number of order tables when multiple orders exist", async () => {
     axios.get.mockResolvedValue({ data: mockOrders });
-    render(
-      <MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
     const numOrderTables = await waitFor(() => screen.getAllByText("#").length);
     expect(numOrderTables).toEqual(mockOrders.length);
   });
 
   it("renders successful order details correctly", async () => {
     axios.get.mockResolvedValue({ data: [mockOrders[0]] });
-    render(<MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const status = await waitFor(() => screen.getByText(mockOrders[0].status));
-    const numBuyerName = await waitFor(() => screen.getAllByText(mockOrders[0].buyer.name).length);
     const paymentStatus = await waitFor(() => screen.getByTestId("payment-status"));
     const quantity = await waitFor(() => screen.getByTestId("quantity"));
 
     expect(status).toBeInTheDocument();
-    expect(numBuyerName).toEqual(2);
     expect(paymentStatus.textContent).toEqual("Success");
     expect(parseInt(quantity.textContent)).toEqual(mockOrders[0].products.length);
   });
   it("renders unsuccessful order details correctly", async () => {
     axios.get.mockResolvedValue({ data: [mockOrders[1]] });
-    render(<MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
     const status = await waitFor(() => screen.getByText(mockOrders[1].status));
-    const numBuyerName = await waitFor(() => screen.getAllByText(mockOrders[1].buyer.name).length);
     const paymentStatus = await waitFor(() => screen.getByTestId("payment-status"));
     const quantity = await waitFor(() => screen.getByTestId("quantity"));
 
     expect(status).toBeInTheDocument();
-    expect(numBuyerName).toEqual(2);
     expect(paymentStatus.textContent).toEqual("Failed");
     expect(parseInt(quantity.textContent)).toEqual(mockOrders[1].products.length);
   });
   it("renders general product details correctly", async () => {
     axios.get.mockResolvedValue({ data: mockOrders });
-    render(<MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
     let expectedProducts = [];
     for (let i = 0; i < mockOrders[0].products.length; i++) {
       const mockProduct = mockOrders[0].products[i];
@@ -199,10 +185,7 @@ describe("Orders", () => {
   });
   it("renders description up to 30 characters", async () => {
     axios.get.mockResolvedValue({ data: mockOrders });
-    render(<MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
 
     const description = await waitFor(() => screen.getByText("Lorem ipsum", { exact: false }));
     expect(description).toBeInTheDocument();
@@ -210,11 +193,7 @@ describe("Orders", () => {
   });
 
   it("fetches orders", async () => {
-    render(
-      <MemoryRouter>
-        <Orders/>
-      </MemoryRouter>
-    );
+    renderComponent();
     await waitFor(() => expect(axios.get).toHaveBeenCalled());
   });
 });

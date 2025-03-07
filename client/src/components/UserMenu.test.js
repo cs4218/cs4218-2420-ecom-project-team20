@@ -6,34 +6,33 @@ import "@testing-library/jest-dom/extend-expect";
 import UserMenu from './UserMenu';
 
 describe('UserMenu', () => {
-  // testing the display of the page
-  it('renders heading', () => {
+  const renderComponent = () => {
     render(
       <MemoryRouter>
         <UserMenu />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: "Dashboard" })).toBeInTheDocument();
+  };
+
+  // testing the display of the page
+  it('renders heading', () => {
+    renderComponent();
+
+    const heading = screen.getByRole('heading', { name: "Dashboard" })
+    expect(heading).toBeInTheDocument();
   });
 
   // testing that the links to Profile and Orders are rendered
   it('renders link to Profile page', () => {
-    render(
-      <MemoryRouter>
-        <UserMenu />
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const profileLink = screen.getByRole('link', { name: "Profile" });
     expect(profileLink).toBeInTheDocument();
     expect(profileLink).toHaveAttribute('href', '/dashboard/user/profile');
   });
-
   it('renders link to Orders page', () => {
-    render(
-      <MemoryRouter>
-        <UserMenu />
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const ordersLink = screen.getByRole('link', { name: "Orders" });
     expect(ordersLink).toBeInTheDocument();
     expect(ordersLink).toHaveAttribute('href', '/dashboard/user/orders');

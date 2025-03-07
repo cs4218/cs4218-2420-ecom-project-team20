@@ -16,71 +16,55 @@ jest.mock("../context/auth", () => ({
     user: testUser,
   }, jest.fn()]),
 }));
-jest.mock("../context/cart", () => ({
-  useCart: jest.fn(() => [null, jest.fn()]),
-}));
-jest.mock("../context/search", () => ({
-  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
-}));
+jest.mock("../components/Layout", () => ({ children }) => <div>{ children }</div>);
 
 describe("Contact", () => {
-  it("renders heading text", () => {
+  const renderComponent = () => {
     render(
       <MemoryRouter>
         <Contact/>
       </MemoryRouter>
     );
+  };
+  it("renders heading text", () => {
+    renderComponent();
+
     const heading = screen.getByRole("heading", { name: "CONTACT US" });
     expect(heading).toBeInTheDocument();
   });
   it("renders heading styling", () => {
-    render(
-      <MemoryRouter>
-        <Contact/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const heading = screen.getByRole("heading", { name: "CONTACT US" });
     let classes = heading.getAttribute("class");
     expect(classes).toBe("bg-dark p-2 text-white text-center");
   })
 
   it("renders contact email", () => {
-    render(
-      <MemoryRouter>
-        <Contact/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const email = screen.getByTestId("contact-email");
     expect(email).toBeInTheDocument();
     expect(email.textContent).toEqual("www.help@ecommerceapp.com");
   });
   it("renders contact phone 1", () => {
-    render(
-      <MemoryRouter>
-        <Contact/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const phone1 = screen.getByTestId("contact-phone1");
     expect(phone1).toBeInTheDocument();
     expect(phone1.textContent).toEqual("012-3456789");
   });
   it("renders contact phone 2", () => {
-    render(
-      <MemoryRouter>
-        <Contact/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const phone2 = screen.getByTestId("contact-phone2");
     expect(phone2).toBeInTheDocument();
     expect(phone2.textContent).toEqual("1800-0000-0000 (toll free)");
   });
 
   it("renders image", () => {
-    render(
-      <MemoryRouter>
-        <Contact/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const image = screen.getByRole("img");
     expect(image.src).toContain("/images/contactus.jpeg");
     expect(image.alt).toEqual("contactus");

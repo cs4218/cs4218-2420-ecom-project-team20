@@ -8,16 +8,13 @@ import toast from "react-hot-toast";
 import Profile from "./Profile";
 
 const testUser = {
-  _id: "1",
   name: "John Smith",
   email: "johnsmith@email.com",
   password: "johnsmithpw",
   phone: "0123456789",
   address: "10 Apple Street",
 };
-
 const newUser = {
-  _id: "1",
   name: "Johnny Smith",
   email: "johnsmith@email.com",
   password: "johnnysmithpw",
@@ -27,95 +24,72 @@ const newUser = {
 
 jest.mock("axios");
 jest.mock("react-hot-toast");
-
 jest.mock("../../context/auth", () => ({
   useAuth: jest.fn(() => [{
     user: testUser
   }, jest.fn()]),
 }));
-jest.mock("../../context/cart", () => ({
-  useCart: jest.fn(() => [null, jest.fn()]),
-}));
-jest.mock("../../context/search", () => ({
-  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]),
-}));
+jest.mock("../../components/Layout", () => ({ children }) => <div>{ children }</div>);
 
 describe("Profile", () => {
-  // testing the display of the page
-  it("renders heading", () => {
+  const renderComponent = () => {
     render(
       <MemoryRouter>
         <Profile/>
       </MemoryRouter>
     );
+  };
+  // testing the display of the page
+  it("renders heading", () => {
+    renderComponent();
+
     expect(screen.getByRole("heading", { name: "USER PROFILE" })).toBeInTheDocument();
   });
   it("renders button", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     expect(screen.getByRole("button", { name: /UPDATE/i })).toBeInTheDocument();
   });
   it("renders form", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     expect(screen.getByTestId("form-container")).toBeInTheDocument();
     expect(screen.getByTestId("form")).toBeInTheDocument();
   });
 
   // testing that the initial values in the form have been set to the user's details
   it("initially renders original name of user", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const initialName = screen.getByPlaceholderText("Enter Your Name");
     expect(initialName).toBeInTheDocument();
     expect(initialName.value).toEqual(testUser.name);
   });
   it("initially renders original email of user", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const initialEmail = screen.getByPlaceholderText("Enter Your Email");
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail.value).toEqual(testUser.email);
   });
   it("does not display original password of user", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const initialPassword = screen.getByPlaceholderText("Enter Your Password");
     expect(initialPassword).toBeInTheDocument();
     expect(initialPassword.value).toEqual("");
     expect(initialPassword.value).toHaveLength(0);
   });
   it("initially renders original phone of user", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const initialPhone = screen.getByPlaceholderText("Enter Your Phone");
     expect(initialPhone).toBeInTheDocument();
     expect(initialPhone.value).toEqual(testUser.phone);
   });
   it("initially renders original address of user", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const initialAddress = screen.getByPlaceholderText("Enter Your Address");
     expect(initialAddress).toBeInTheDocument();
     expect(initialAddress.value).toEqual(testUser.address);
@@ -123,11 +97,8 @@ describe("Profile", () => {
 
   // testing the functionality of the form
   it("does not allow changing email of user", () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     const initialEmail = screen.getByPlaceholderText("Enter Your Email");
     expect(initialEmail).toBeInTheDocument();
     expect(initialEmail).toBeDisabled();
@@ -142,12 +113,8 @@ describe("Profile", () => {
         updatedUser: newUser,
       },
     });
+    renderComponent();
 
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
       target: { value: newUser.name },
     });
@@ -165,11 +132,8 @@ describe("Profile", () => {
     await waitFor(() => expect(axios.put).toHaveBeenCalled());
   });
   it("does not allow form submission when len(password) < 6", async () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
+
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
       target: { value: newUser.name },
     });
@@ -189,11 +153,7 @@ describe("Profile", () => {
     expect(toast.error).toHaveBeenCalled();
   });
   it("does not allow form submission when len(password) == 6", async () => {
-    render(
-      <MemoryRouter>
-        <Profile/>
-      </MemoryRouter>
-    );
+    renderComponent();
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
       target: { value: newUser.name },
     });
