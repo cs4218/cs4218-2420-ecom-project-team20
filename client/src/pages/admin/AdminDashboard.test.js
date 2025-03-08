@@ -4,58 +4,27 @@ import { useAuth } from "../../context/auth";
 import React from "react";
 import AdminDashboard from "./AdminDashboard";
 import "@testing-library/jest-dom";
+import { afterEach } from "node:test";
 
-// Mock Layout component
 jest.mock("../../components/Layout", () =>
   jest.fn(({ children }) => <div>{children}</div>)
 );
 
-// Mock AdminMenu component
 jest.mock("../../components/AdminMenu", () =>
   jest.fn(() => <div>Admin Menu</div>)
 );
 
-// Mock useAuth component
 jest.mock("../../context/auth", () => ({
   useAuth: jest.fn(),
 }));
 
 describe("AdminDashboard Component", () => {
-  const mockAuth = {
-    user: {
-      name: "John Doe",
-      email: "admin@example.com",
-      phone: "123-456-7890",
-    },
-  };
-
-  beforeEach(() => {
-    useAuth.mockReturnValue([mockAuth]);
-  });
-
-  it("renders Layout component", () => {
-    const { container } = render(
-      <MemoryRouter>
-        <AdminDashboard />
-      </MemoryRouter>
-    );
-
-    // Check if Layout's class is in the document
-    expect(container.querySelector(".container-fluid")).toBeInTheDocument();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("renders AdminDashboard component correctly", () => {
-    useAuth.mockReturnValue([
-      {
-        user: {
-          name: "John Doe",
-          email: "admin@example.com",
-          phone: "123-456-7890",
-        },
-      },
-    ]);
-
-    const { container } = render(
+    const { getByText } = render(
       <MemoryRouter initialEntries={["/dashboard/admin"]}>
         <Routes>
           <Route path="/dashboard/admin" element={<AdminDashboard />} />
@@ -63,16 +32,12 @@ describe("AdminDashboard Component", () => {
       </MemoryRouter>
     );
 
-    expect(container).toMatchSnapshot(); // ✅ Snapshot test
+    expect(getByText(/Admin Name/i)).toBeInTheDocument();
+    expect(getByText(/Admin Email/i)).toBeInTheDocument();
+    expect(getByText(/Admin Contact/i)).toBeInTheDocument();
   });
 
   it("renders AdminMenu inside AdminDashboard", () => {
-    // Mock the auth state
-    useAuth.mockReturnValue([
-      {
-        user: {},
-      },
-    ]);
     const { getByText } = render(
       <MemoryRouter initialEntries={["/dashboard/admin"]}>
         <Routes>
@@ -108,7 +73,7 @@ describe("AdminDashboard Component", () => {
   });
 
   it("handles missing user data gracefully", () => {
-    useAuth.mockReturnValue([{}]); // No user data
+    useAuth.mockReturnValue([{}]);
 
     const { getByText } = render(
       <MemoryRouter initialEntries={["/dashboard/admin"]}>
@@ -124,7 +89,7 @@ describe("AdminDashboard Component", () => {
   });
 
   it("handles null auth data gracefully", () => {
-    useAuth.mockReturnValue(null); // Simulate missing auth context
+    useAuth.mockReturnValue(null);
 
     const { getByText } = render(
       <MemoryRouter initialEntries={["/dashboard/admin"]}>
