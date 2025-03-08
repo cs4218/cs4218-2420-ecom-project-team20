@@ -30,7 +30,7 @@ const mockCategoryProducts = [
         shipping: true,
       },
       {
-        _id: 2,
+        _id: 3,
         name: "The Law of Contract in Singapore",
         slug: "the-law-of-contract-in-singapore",
         description: "A bestselling book in Singapore",
@@ -105,17 +105,14 @@ describe("CategoryProduct", () => {
     renderComponent(mockCategoryProducts[0].category.slug);
     await waitFor(() => expect(screen.getByRole("heading", { name: `Category - ${ mockCategoryProducts[0].category.name }` })).toBeInTheDocument());
   });
+
   it("renders number of results found for the category", async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
     await waitFor(() => expect(screen.getByRole("heading", { name: `${ mockCategoryProducts[0].products.length } result found` })).toBeInTheDocument());
   });
-  it('renders number of results found for the category', async () => {
-    axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
-    renderComponent(mockCategoryProducts[0].category.slug);
-    await waitFor(() => expect(screen.getByRole("heading", { name: `${ mockCategoryProducts[0].products.length } result found` })).toBeInTheDocument());
-  });
-  it('renders details for the products of the category', async () => {
+
+  it('renders details for category products', async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
 
@@ -143,7 +140,19 @@ describe("CategoryProduct", () => {
     const productButtons = await waitFor(() => screen.getAllByRole("button", { name: "More Details" }));
     expect(productButtons.length).toEqual(mockCategoryProducts[0].products.length);
   });
-  it('links buttons to relevant product detail pages', async () => {
+
+  it("renders images of category products", async () => {
+    axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
+    renderComponent(mockCategoryProducts[0].category.slug);
+
+    mockCategoryProducts[0].products.map(async (product) => {
+      const image = await waitFor(() => screen.getByTestId(`cp-img-${ product.name }`));
+      expect(image.src).toEqual(`http://localhost/api/v1/product/product-photo/${ product._id }`);
+      expect(image.alt).toEqual(`${ product.name }`);
+    });
+  });
+
+  it('renders and links buttons to product detail pages', async () => {
     axios.get.mockResolvedValue({ data: mockCategoryProducts[0] });
     renderComponent(mockCategoryProducts[0].category.slug);
 

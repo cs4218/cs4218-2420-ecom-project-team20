@@ -106,7 +106,6 @@ describe("Orders", () => {
       </MemoryRouter>
     );
   };
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -115,6 +114,7 @@ describe("Orders", () => {
     renderComponent();
     expect(screen.getByRole("heading", { name: "All Orders" })).toBeInTheDocument();
   });
+
   it("renders headers of order table correctly", async () => {
     axios.get.mockResolvedValue({ data: [mockOrders[0]] });
     renderComponent();
@@ -128,6 +128,7 @@ describe("Orders", () => {
     await waitFor(() => expect(screen.getByText("Payment")).toBeInTheDocument());
     await waitFor(() => expect(screen.getByText("Quantity")).toBeInTheDocument());
   });
+
   it("renders correct number of order tables when multiple orders exist", async () => {
     axios.get.mockResolvedValue({ data: mockOrders });
     renderComponent();
@@ -147,6 +148,7 @@ describe("Orders", () => {
     expect(paymentStatus.textContent).toEqual("Success");
     expect(parseInt(quantity.textContent)).toEqual(mockOrders[0].products.length);
   });
+
   it("renders unsuccessful order details correctly", async () => {
     axios.get.mockResolvedValue({ data: [mockOrders[1]] });
     renderComponent();
@@ -158,6 +160,7 @@ describe("Orders", () => {
     expect(paymentStatus.textContent).toEqual("Failed");
     expect(parseInt(quantity.textContent)).toEqual(mockOrders[1].products.length);
   });
+
   it("renders general product details correctly", async () => {
     axios.get.mockResolvedValue({ data: mockOrders });
     renderComponent();
@@ -166,7 +169,7 @@ describe("Orders", () => {
       const mockProduct = mockOrders[0].products[i];
       const productName = await waitFor(() => screen.getByText(mockProduct.name));
       const productDescription = await waitFor(() => screen.getByText(mockProduct.description));
-      const productPrice = await waitFor(() => screen.getByText(`Price : ${mockProduct.price}`));
+      const productPrice = await waitFor(() => screen.getByText(`Price : ${ mockProduct.price }`));
       expectedProducts.push({ name: productName, description: productDescription, price: productPrice });
     }
 
@@ -174,7 +177,7 @@ describe("Orders", () => {
       const mockProduct = mockOrders[1].products[i];
       const productName = await waitFor(() => screen.getByText(mockProduct.name));
       const productDescription = await waitFor(() => screen.getByText(mockProduct.description));
-      const productPrice = await waitFor(() => screen.getByText(`Price : ${mockProduct.price}`));
+      const productPrice = await waitFor(() => screen.getByText(`Price : ${ mockProduct.price }`));
       expectedProducts.push({ name: productName, description: productDescription, price: productPrice });
     }
 
@@ -185,6 +188,7 @@ describe("Orders", () => {
       expect(expectedProduct.price).toBeInTheDocument();
     }
   });
+
   it("renders description up to 30 characters", async () => {
     axios.get.mockResolvedValue({ data: mockOrders });
     renderComponent();
