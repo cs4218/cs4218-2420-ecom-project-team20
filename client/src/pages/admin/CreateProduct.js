@@ -46,15 +46,16 @@ const CreateProduct = () => {
       productData.append("quantity", quantity);
       productData.append("photo", photo);
       productData.append("category", category);
-      const { data } = axios.post(
+      productData.append("shipping", shipping);
+      const { data } = await axios.post(
         "/api/v1/product/create-product",
         productData
       );
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
         toast.success("Product Created Successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
       }
     } catch (error) {
       console.log(error);
@@ -73,11 +74,12 @@ const CreateProduct = () => {
             <h1>Create Product</h1>
             <div className="m-1 w-75">
               <Select
-                bordered={false}
+                variant={false}
                 placeholder="Select a category"
                 size="large"
                 showSearch
                 className="form-select mb-3"
+                data-testid="category-select"
                 onChange={(value) => {
                   setCategory(value);
                 }}
@@ -137,6 +139,7 @@ const CreateProduct = () => {
                   value={price}
                   placeholder="write a Price"
                   className="form-control"
+                  min="0"
                   onChange={(e) => setPrice(e.target.value)}
                 />
               </div>
@@ -146,16 +149,18 @@ const CreateProduct = () => {
                   value={quantity}
                   placeholder="write a quantity"
                   className="form-control"
+                  min="0"
                   onChange={(e) => setQuantity(e.target.value)}
                 />
               </div>
               <div className="mb-3">
                 <Select
-                  bordered={false}
-                  placeholder="Select Shipping "
+                  variant={false}
+                  placeholder="Select Shipping"
                   size="large"
                   showSearch
                   className="form-select mb-3"
+                  data-testid="shipping-select"
                   onChange={(value) => {
                     setShipping(value);
                   }}
