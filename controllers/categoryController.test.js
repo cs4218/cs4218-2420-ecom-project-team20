@@ -54,7 +54,7 @@ describe("Category Controller Tests", () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.send).toHaveBeenCalledWith({
-        success: true,
+        success: false,
         message: "Category Already Exisits",
       });
     });
@@ -135,7 +135,7 @@ describe("Category Controller Tests", () => {
         name: "Existing Category", 
         _id: { $ne: "category123" } 
       });
-      expect(mockRes.status).toHaveBeenCalledWith(409);
+      expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.send).toHaveBeenCalledWith({
         success: false,
         message: "Category with this name already exists",

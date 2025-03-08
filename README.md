@@ -21,7 +21,9 @@ Before running this application, make sure you have the following installed:
 
 ## CI (Automated testing through Github Actions)
 
-
+CI Workflow [Here](https://github.com/cs4218/cs4218-2420-ecom-project-team20/actions/workflows/main.yml)!
+\
+CI Test Run Example [Here](https://github.com/cs4218/cs4218-2420-ecom-project-team20/actions/runs/13738099412/job/38424162066)
 
 ## Installation
 
