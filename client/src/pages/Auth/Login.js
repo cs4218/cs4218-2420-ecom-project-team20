@@ -37,13 +37,16 @@ const Login = () => {
           token: res.data.token,
         });
         localStorage.setItem("auth", JSON.stringify(res.data));
-        navigate(location.state || "/");
+        setTimeout(() => {
+          navigate(location.state || "/");
+        }, 50);
       } else {
         toast.error(res.data.message);
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
+      const errorMessage = error.response.data.message;
+      console.log(errorMessage);
+      toast.error(errorMessage || "Something went wrong");
     }
   };
   return (

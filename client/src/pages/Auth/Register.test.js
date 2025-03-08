@@ -6,52 +6,53 @@ import "@testing-library/jest-dom/extend-expect";
 import toast from "react-hot-toast";
 import Register from "./Register";
 
-// Mocking axios.post
 jest.mock("axios");
 jest.mock("react-hot-toast");
 
 jest.mock("../../context/auth", () => ({
-  useAuth: jest.fn(() => [null, jest.fn()]), // Mock useAuth hook to return null state and a mock function for setAuth
+  useAuth: jest.fn().mockReturnValue([null, jest.fn()]),
 }));
 
 jest.mock("../../context/cart", () => ({
-  useCart: jest.fn(() => [null, jest.fn()]), // Mock useCart hook to return null state and a mock function
+  useCart: jest.fn().mockReturnValue([null, jest.fn()]),
 }));
 
-jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
+jest.mock("../../hooks/useCategory", () => jest.fn().mockReturnValue([]));
 
 jest.mock("../../context/search", () => ({
-  useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
+  useSearch: jest.fn().mockReturnValue([{ keyword: "" }, jest.fn()]),
 }));
-
-Object.defineProperty(window, "localStorage", {
-  value: {
-    setItem: jest.fn(),
-    getItem: jest.fn(),
-    removeItem: jest.fn(),
-  },
-  writable: true,
-});
-
-window.matchMedia =
-  window.matchMedia ||
-  function () {
-    return {
-      matches: false,
-      addListener: function () {},
-      removeListener: function () {},
-    };
-  };
 
 describe("Register Component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
+  it("renders the registration form correctly", () => {
+    const { getByText, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(getByPlaceholderText("Enter Your Name")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Email")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Password")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Phone")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your Address")).toBeInTheDocument();
+    expect(getByPlaceholderText("Enter Your DOB")).toBeInTheDocument();
+    expect(
+      getByPlaceholderText("What is Your Favorite sports")
+    ).toBeInTheDocument();
+    expect(getByText("REGISTER")).toBeInTheDocument();
+  });
+
   it("should register the user successfully", async () => {
     axios.post.mockResolvedValueOnce({ data: { success: true } });
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByPlaceholderText, getByRole } = render(
       <MemoryRouter initialEntries={["/register"]}>
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -81,18 +82,29 @@ describe("Register Component", () => {
       target: { value: "Football" },
     });
 
-    fireEvent.click(getByText("REGISTER"));
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
 
-    await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith(
-      "Register Successfully, please login"
-    );
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith("/api/v1/auth/register", {
+        name: "John Doe",
+        email: "test@example.com",
+        password: "password123",
+        phone: "1234567890",
+        address: "123 Street",
+        DOB: "2000-01-01",
+        answer: "Football",
+      });
+
+      expect(toast.success).toHaveBeenCalledWith(
+        "Register Successfully, please login"
+      );
+    });
   });
 
   it("should display error message on failed registration", async () => {
-    axios.post.mockRejectedValueOnce({ message: "User already exists" });
+    axios.post.mockRejectedValueOnce({});
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByRole, getByPlaceholderText } = render(
       <MemoryRouter initialEntries={["/register"]}>
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -122,9 +134,36 @@ describe("Register Component", () => {
       target: { value: "Football" },
     });
 
-    fireEvent.click(getByText("REGISTER"));
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+  });
+
+  it("should not submit when required fields are missing", async () => {
+    const { getByRole } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
+
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
+  it("should show validation errors when required fields are missing", () => {
+    const { getByRole, getByPlaceholderText } = render(
+      <MemoryRouter initialEntries={["/register"]}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(getByRole("button", { name: "REGISTER" }));
+
+    expect(getByPlaceholderText("Enter Your Name")).toBeInvalid();
   });
 });
