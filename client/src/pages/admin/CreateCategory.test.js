@@ -1,14 +1,16 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import "@testing-library/jest-dom";
 import axios from "axios";
 import CreateCategory from "./CreateCategory";
 import { MemoryRouter } from "react-router-dom";
-import { ConfigProvider } from "antd";
 import toast from "react-hot-toast";
-import Layout from "../../components/Layout";
-import AdminMenu from "../../components/AdminMenu";
-import CategoryForm from "../../components/Form/CategoryForm";
 
 jest.mock("axios");
 jest.mock("react-hot-toast", () => ({
@@ -19,8 +21,16 @@ jest.mock("../../components/Layout", () => ({ children }) => (
   <div>{children}</div>
 ));
 jest.mock("../../components/AdminMenu", () => () => <div>AdminMenu</div>);
-jest.mock("../../components/Form/CategoryForm", () => () => (
-  <form>CategoryForm</form>
+jest.mock("../../components/Form/CategoryForm", () => (props) => (
+  <form onSubmit={props.handleSubmit}>
+    <input
+      type="text"
+      placeholder="Enter new category"
+      value={props.value}
+      onChange={(e) => props.setValue(e.target.value)}
+    />
+    <button type="submit">Submit</button>
+  </form>
 ));
 
 describe("CreateCategory Component", () => {
@@ -28,7 +38,7 @@ describe("CreateCategory Component", () => {
     jest.clearAllMocks();
   });
 
-  it("renders CreateCategory component and loads categories", async () => {
+  it("renders CreateCategory component and loads categories from API", async () => {
     const mockCategories = [
       { _id: "1", name: "Books" },
       { _id: "2", name: "Electronics" },
@@ -48,21 +58,20 @@ describe("CreateCategory Component", () => {
       expect(getByText("Manage Category")).toBeInTheDocument();
       expect(getByText("Books")).toBeInTheDocument();
       expect(getByText("Electronics")).toBeInTheDocument();
+
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/category/get-category");
     });
   });
 
-  it("should not update if category already exists", async () => {
-    const mockCategories = [
-      { _id: "1", name: "Books" },
-      { _id: "2", name: "Electronics" },
-    ];
+  it("creates a new category successfully", async () => {
+    const mockCategories = [{ _id: "1", name: "Books" }];
 
-    axios.get.mockResolvedValue({
+    axios.get.mockResolvedValueOnce({
       data: { success: true, category: mockCategories },
     });
 
-    axios.put.mockResolvedValue({
-      data: { success: true, message: "Category updated successfully" },
+    axios.post.mockResolvedValueOnce({
+      data: { success: true },
     });
 
     render(
@@ -71,66 +80,289 @@ describe("CreateCategory Component", () => {
       </MemoryRouter>
     );
 
-    // Wait for categories to load
-    await waitFor(() => expect(screen.getByText("Books")).toBeInTheDocument());
-
-    // Find and click the first "Edit" button
-    const editButtons = screen.getAllByText("Edit");
-    fireEvent.click(editButtons[0]);
-
-    // 🔥 **Wait for input field to appear**
-    const input = await waitFor(() => screen.getByRole("textbox"));
-
-    // Change input value to an existing category name ("Electronics")
-    fireEvent.change(input, { target: { value: "Electronics" } });
-
-    // Submit update form
-    fireEvent.click(screen.getByText("Submit"));
-
-    // **Ensure PUT request was NOT called**
-    await waitFor(() => {
-      expect(axios.put).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByPlaceholderText(/Enter new category/i), {
+      target: { value: "New Category" },
     });
 
-    // **Ensure error toast is displayed**
-    expect(toast.error).toHaveBeenCalledWith("Category already exists!");
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("New Category is created");
+
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/category/create-category",
+        {
+          name: "New Category",
+        }
+      );
+
+      expect(axios.get).toHaveBeenCalledTimes(2);
+    });
   });
 
-  //   it("should throw error upon submission of duplicate categories", async () => {
-  //     const categories = [
-  //       { _id: "1", name: "Electronics" },
-  //       { _id: "2", name: "Clothing" },
-  //     ];
+  it("calls getAllCategory after successful category creation", async () => {
+    axios.post.mockResolvedValue({ data: { success: true } });
 
-  //     const mockHandleSubmit = jest.fn((e) => {
-  //       e.preventDefault();
-  //       if (categories.some((c) => c.name.toLowerCase() === "electronics")) {
-  //         toast.error("Category already exists!");
-  //       }
-  //     });
+    axios.get.mockResolvedValue({
+      data: { success: true, category: [{ _id: "1", name: "Tech" }] },
+    });
 
-  //     const { getByPlaceholderText, getByRole } = render(
-  //       <MemoryRouter>
-  //         <CategoryForm
-  //           handleSubmit={mockHandleSubmit}
-  //           value="Electronics"
-  //           setValue={jest.fn()}
-  //           categories={categories}
-  //         />
-  //       </MemoryRouter>
-  //     );
+    const { getByPlaceholderText, getByRole, getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
 
-  //     const input = getByPlaceholderText("Enter new category");
-  //     const submitButton = getByRole("button", { name: /submit/i });
+    fireEvent.change(getByPlaceholderText(/Enter new category/i), {
+      target: { value: "New Category" },
+    });
 
-  //     fireEvent.change(input, { target: { value: "Electronics" } });
+    fireEvent.click(getByRole("button", { name: /submit/i }));
 
-  //     fireEvent.click(submitButton);
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/category/create-category",
+        {
+          name: "New Category",
+        }
+      );
 
-  //     await waitFor(() => {
-  //       expect(toast.error).toHaveBeenCalledWith("Category already exists!");
-  //     });
+      expect(toast.success).toHaveBeenCalledWith("New Category is created");
 
-  //     expect(mockHandleSubmit).toHaveBeenCalled();
-  //   });
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/category/get-category");
+
+      expect(getByText("Tech")).toBeInTheDocument();
+    });
+  });
+
+  it("trims input before submitting", async () => {
+    axios.post.mockResolvedValue({ data: { success: true } });
+
+    const { getByRole, getByPlaceholderText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(getByPlaceholderText(/Enter new category/i), {
+      target: { value: "   New Category   " },
+    });
+
+    fireEvent.click(getByRole("button", { name: /submit/i }));
+
+    await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/category/create-category",
+        {
+          name: "New Category",
+        }
+      );
+    });
+  });
+
+  it("prevents creation of category when input is empty", async () => {
+    const { getByRole } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    const submitButton = getByRole("button", { name: /submit/i });
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Category cannot be empty.");
+    });
+
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
+  it("displays error on creation when category already exists", async () => {
+    const mockCategories = [{ _id: "1", name: "Books" }];
+
+    axios.get.mockResolvedValue({
+      data: { success: true, category: mockCategories },
+    });
+
+    const { getByRole, getByPlaceholderText, getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(getByText("Books")).toBeInTheDocument();
+    });
+
+    fireEvent.change(getByPlaceholderText(/Enter new category/i), {
+      target: { value: "Books" },
+    });
+
+    fireEvent.click(getByRole("button", { name: /submit/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Category already exists!");
+    });
+
+    expect(axios.post).not.toHaveBeenCalled();
+  });
+
+  it("updates a category successfully", async () => {
+    axios.get.mockResolvedValue({
+      data: { success: true, category: [{ _id: "1", name: "OldCat" }] },
+    });
+    axios.put.mockResolvedValue({ data: { success: true } });
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => getByText("OldCat"));
+    const editButton = getByText("Edit");
+    fireEvent.click(editButton); // Open the modal
+
+    const modal = await screen.findByRole("dialog");
+    const modalInput = within(modal).getByPlaceholderText("Enter new category");
+    fireEvent.change(modalInput, { target: { value: "UpdatedCat" } });
+
+    const submitButton = within(modal).getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalledWith(
+        "/api/v1/category/update-category/1",
+        {
+          name: "UpdatedCat",
+        }
+      );
+
+      expect(toast.success).toHaveBeenCalledWith("UpdatedCat is updated");
+    });
+  });
+
+  it("should show error message when updating a category with a duplicate name", async () => {
+    axios.put.mockResolvedValueOnce({
+      data: {
+        success: false,
+        message: "Category already exists",
+      },
+    });
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => getByText("OldCat"));
+    const editButton = getByText("Edit");
+    fireEvent.click(editButton);
+
+    const modal = await screen.findByRole("dialog");
+
+    const modalInput = within(modal).getByPlaceholderText("Enter new category");
+    fireEvent.change(modalInput, { target: { value: "OldCat" } });
+
+    const submitButton = within(modal).getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Category already exists");
+    });
+  });
+
+  it("should show 'Something went wrong' message when updating a category fails", async () => {
+    axios.put.mockRejectedValueOnce(new Error("Something went wrong"));
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => getByText("OldCat"));
+    const editButton = getByText("Edit");
+    fireEvent.click(editButton);
+
+    const modal = await screen.findByRole("dialog");
+
+    const modalInput = within(modal).getByPlaceholderText("Enter new category");
+    fireEvent.change(modalInput, { target: { value: "UpdatedCat" } });
+
+    const submitButton = within(modal).getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+  });
+
+  it("deletes a category successfully", async () => {
+    axios.delete.mockResolvedValue({ data: { success: true } });
+    axios.get.mockResolvedValue({
+      data: { success: true, category: [{ _id: "1", name: "Books" }] },
+    });
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => getByText("Books"));
+    const deleteButton = getByText("Delete");
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(axios.delete).toHaveBeenCalledWith(
+        "/api/v1/category/delete-category/1"
+      );
+      expect(axios.get).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("shows success message after category deletion", async () => {
+    axios.delete.mockResolvedValue({ data: { success: true } });
+    axios.get.mockResolvedValue({
+      data: { success: true, category: [{ _id: "1", name: "Books" }] },
+    });
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => getByText("Books"));
+    const deleteButton = getByText("Delete");
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(axios.delete).toHaveBeenCalledWith(
+        "/api/v1/category/delete-category/1"
+      );
+      expect(toast.success).toHaveBeenCalledWith("category is deleted");
+    });
+  });
+
+  it("shows error message when deletion fails", async () => {
+    axios.delete.mockRejectedValue(new Error("Network error"));
+
+    const { getByText } = render(
+      <MemoryRouter>
+        <CreateCategory />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => getByText("Books"));
+    const deleteButton = getByText("Delete");
+    fireEvent.click(deleteButton); // Open the modal
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+  });
 });
