@@ -51,10 +51,12 @@ const CreateProduct = () => {
         "/api/v1/product/create-product",
         productData
       );
-      if (data?.success) {
+      if (data.success) {
+        console.log("success message: ", data?.message);
         toast.success("Product Created Successfully");
         navigate("/dashboard/admin/products");
       } else {
+        console.log("fail message: ", data?.message);
         toast.error(data?.message);
       }
     } catch (error) {

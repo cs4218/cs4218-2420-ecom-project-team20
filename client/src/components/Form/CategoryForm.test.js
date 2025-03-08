@@ -54,7 +54,7 @@ describe("CategoryForm Component", () => {
     const handleSubmitMock = jest.fn();
     const setValueMock = jest.fn();
 
-    const { getByLabelText, getByRole, getByPlaceholderText } = render(
+    const { getByRole, getByPlaceholderText } = render(
       <MemoryRouter>
         <CategoryForm
           handleSubmit={handleSubmitMock}
