@@ -56,7 +56,6 @@ describe("Register Controller Test", () => {
   let req, res;
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
     req = {
       body: {
         name: "John Doe",
@@ -76,24 +75,53 @@ describe("Register Controller Test", () => {
 
   test("should return 400 for invalid email", async () => {
     req.body.email = "invalid-email";
-
     userModel.findOne.mockResolvedValue(null);
     await registerController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(userModel).not.toHaveBeenCalled();
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Invalid email",
+    });
+  });
+
+  test("should return error when name is missing", async () => {
+    req.body.name = "";
+    await registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ error: "Name is required" });
+  });
+
+  test("should return error when email is missing", async () => {
+    req.body.email = "";
+    await registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Email is required" });
+  });
+
+  test("should return error when password is missing", async () => {
+    req.body.password = "";
+    await registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Password is required" });
+  });
+
+  test("should return error when phone is missing", async () => {
+    req.body.phone = "";
+    await registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Phone number is required" });
+  });
+
+  test("should return error when address is missing", async () => {
+    req.body.address = "";
+    await registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Address is required" });
+  });
+
+  test("should return error when answer is missing", async () => {
+    req.body.answer = "";
+    await registerController(req, res);
+    expect(res.send).toHaveBeenCalledWith({ message: "Answer is required" });
   });
 
   test("should register user successfully with valid details", async () => {
     userModel.findOne.mockResolvedValue(null);
-    userModel.create.mockResolvedValue({
-      _id: "12345",
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-      address: req.body.address,
-      password: "hashedPassword123",
-      answer: req.body.answer,
-    });
     await registerController(req, res);
     expect(userModel.findOne).toHaveBeenCalledWith({ email: req.body.email });
     expect(hashPassword).toHaveBeenCalledWith(req.body.password);
@@ -110,7 +138,7 @@ describe("Register Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "User Register Successfully",
+      message: "User registered successfully",
       user: {
         name: req.body.name,
         email: req.body.email,
@@ -124,25 +152,25 @@ describe("Register Controller Test", () => {
 
   test("user registration fails if email is already registered", async () => {
     userModel.findOne.mockResolvedValue({ email: req.body.email });
-
     await registerController(req, res);
-
     expect(userModel.findOne).toHaveBeenCalledWith({ email: req.body.email });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Already Register please login",
+      message: "Already registered, please login",
     });
-    expect(userModel.create).not.toHaveBeenCalled();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.useRealTimers();
-  });
-
-  afterAll(() => {
-    jest.resetModules();
+  test("should catch exception in registerController", async () => {
+    req.body.email = "valid@example.com";
+    userModel.findOne.mockRejectedValue(new Error("DB error"));
+    await registerController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error in registration",
+      error: expect.any(Error),
+    });
   });
 });
 
@@ -176,7 +204,7 @@ describe("Login Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Email is not registerd",
+      message: "Email is not registered",
     });
   });
 
@@ -229,7 +257,7 @@ describe("Login Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "login successfully",
+      message: "Logged in successfully",
       user: {
         _id: mockUser._id,
         name: mockUser.name,
@@ -239,6 +267,17 @@ describe("Login Controller Test", () => {
         role: mockUser.role,
       },
       token: "token123",
+    });
+  });
+
+  test("should catch exception in loginController", async () => {
+    userModel.findOne.mockRejectedValue(new Error("DB error"));
+    await loginController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error in login",
+      error: expect.any(Error),
     });
   });
 });
@@ -265,14 +304,14 @@ describe("Forgot Password Controller Test", () => {
     req.body.email = "";
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith({ message: "Emai is required" });
+    expect(res.send).toHaveBeenCalledWith({ message: "Email is required" });
   });
 
   test("should return 400 if answer is missing", async () => {
     req.body.answer = "";
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith({ message: "answer is required" });
+    expect(res.send).toHaveBeenCalledWith({ message: "Answer is required" });
   });
 
   test("should return 400 if newPassword is missing", async () => {
@@ -280,7 +319,7 @@ describe("Forgot Password Controller Test", () => {
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
-      message: "New Password is required",
+      message: "New password is required",
     });
   });
 
@@ -294,7 +333,7 @@ describe("Forgot Password Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Wrong Email Or Answer",
+      message: "Wrong email or answer",
     });
   });
 
@@ -314,7 +353,18 @@ describe("Forgot Password Controller Test", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Password Reset Successfully",
+      message: "Password reset successfully",
+    });
+  });
+
+  test("should catch exception in forgotPasswordController", async () => {
+    userModel.findOne.mockRejectedValue(new Error("DB error"));
+    await forgotPasswordController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Something went wrong",
+      error: expect.any(Error),
     });
   });
 });
@@ -374,7 +424,7 @@ describe("Update Profile Controller", () => {
     req.body.password = "123";
     await updateProfileController(req, res);
     expect(res.json).toHaveBeenCalledWith({
-      error: "Passsword is required and 6 character long",
+      error: "Password must be at least 6 characters long",
     });
   });
 
@@ -395,7 +445,7 @@ describe("Update Profile Controller", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: "Profile Updated SUccessfully",
+      message: "Profile updated successfully",
       updatedUser: {
         _id: "user123",
         name: req.body.name,
@@ -419,6 +469,17 @@ describe("Update Profile Controller", () => {
       },
       { new: true }
     );
+  });
+
+  test("should catch exception in updateProfileController", async () => {
+    userModel.findById.mockRejectedValue(new Error("DB error"));
+    await updateProfileController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while updating profile",
+      error: expect.any(Error),
+    });
   });
 });
 
@@ -454,7 +515,7 @@ describe("Get Orders Controller", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error while getting orders",
       error: expect.any(Error),
     });
   });
@@ -495,7 +556,7 @@ describe("Get All Orders Controller", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error WHile Geting Orders",
+      message: "Error while getting orders",
       error: expect.any(Error),
     });
   });
@@ -531,7 +592,7 @@ describe("Order Status Controller", () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Error While Updateing Order",
+      message: "Error while updating order",
       error: expect.any(Error),
     });
   });

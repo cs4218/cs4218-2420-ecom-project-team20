@@ -4,7 +4,7 @@ export default {
   testEnvironment: "node",
   testMatch: ["<rootDir>/*/*.test.js"],
   collectCoverage: true,
-  collectCoverageFrom: ["controllers/**"],
+  collectCoverageFrom: ["<rootDir>/*/*.js"],
   coverageThreshold: {
     global: {
       lines: 10,
