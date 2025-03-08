@@ -172,12 +172,12 @@ export const testController = (req, res) => {
   }
 };
 
-//update prfole
+//update profile
 export const updateProfileController = async (req, res) => {
   try {
     const { name, email, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
-    //password
+    // password
     if (password && password.length < 6) {
       return res.json({ error: "Passsword is required and 6 character long" });
     }
@@ -201,7 +201,7 @@ export const updateProfileController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      message: "Error WHile Update profile",
+      message: "Error WHile Update Profile",
       error,
     });
   }
