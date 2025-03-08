@@ -44,17 +44,19 @@ describe("Profile", () => {
       </MemoryRouter>
     );
   };
-  // testing the display of the page
+
   it("renders heading", () => {
     renderComponent();
 
     expect(screen.getByRole("heading", { name: "USER PROFILE" })).toBeInTheDocument();
   });
+
   it("renders button", () => {
     renderComponent();
 
     expect(screen.getByRole("button", { name: /UPDATE/i })).toBeInTheDocument();
   });
+
   it("renders form", () => {
     renderComponent();
 
@@ -62,21 +64,25 @@ describe("Profile", () => {
     expect(screen.getByTestId("form")).toBeInTheDocument();
   });
 
-  // testing that the initial values in the form have been set to the user's details
-  it("initially renders original name of user", () => {
+  it("initially renders original details of the user", () => {
     renderComponent();
 
     const initialName = screen.getByPlaceholderText("Enter Your Name");
-    expect(initialName).toBeInTheDocument();
-    expect(initialName.value).toEqual(testUser.name);
-  });
-  it("initially renders original email of user", () => {
-    renderComponent();
-
     const initialEmail = screen.getByPlaceholderText("Enter Your Email");
+    const initialPhone = screen.getByPlaceholderText("Enter Your Phone");
+    const initialAddress = screen.getByPlaceholderText("Enter Your Address");
+
+    expect(initialName).toBeInTheDocument();
     expect(initialEmail).toBeInTheDocument();
+    expect(initialPhone).toBeInTheDocument();
+    expect(initialAddress).toBeInTheDocument();
+
+    expect(initialName.value).toEqual(testUser.name);
     expect(initialEmail.value).toEqual(testUser.email);
+    expect(initialPhone.value).toEqual(testUser.phone);
+    expect(initialAddress.value).toEqual(testUser.address);
   });
+
   it("does not display original password of user", () => {
     renderComponent();
 
@@ -85,22 +91,7 @@ describe("Profile", () => {
     expect(initialPassword.value).toEqual("");
     expect(initialPassword.value).toHaveLength(0);
   });
-  it("initially renders original phone of user", () => {
-    renderComponent();
 
-    const initialPhone = screen.getByPlaceholderText("Enter Your Phone");
-    expect(initialPhone).toBeInTheDocument();
-    expect(initialPhone.value).toEqual(testUser.phone);
-  });
-  it("initially renders original address of user", () => {
-    renderComponent();
-
-    const initialAddress = screen.getByPlaceholderText("Enter Your Address");
-    expect(initialAddress).toBeInTheDocument();
-    expect(initialAddress.value).toEqual(testUser.address);
-  });
-
-  // testing the functionality of the form
   it("does not allow changing email of user", () => {
     renderComponent();
 
@@ -109,7 +100,6 @@ describe("Profile", () => {
     expect(initialEmail).toBeDisabled();
   });
 
-  // testing the handleSubmit() function with axios.put
   it("handles form submission", async () => {
     axios.put.mockResolvedValue({
       data: {
@@ -136,6 +126,7 @@ describe("Profile", () => {
     fireEvent.submit(form);
     await waitFor(() => expect(axios.put).toHaveBeenCalled());
   });
+
   it("does not allow form submission when len(password) < 6", async () => {
     renderComponent();
 
@@ -157,6 +148,7 @@ describe("Profile", () => {
     await waitFor(() => expect(axios.put).toHaveBeenCalled());
     expect(toast.error).toHaveBeenCalled();
   });
+
   it("does not allow form submission when len(password) == 6", async () => {
     renderComponent();
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {

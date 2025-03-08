@@ -24,12 +24,14 @@ describe("Contact", () => {
       </MemoryRouter>
     );
   };
+
   it("renders heading text", () => {
     renderComponent();
 
     const heading = screen.getByRole("heading", { name: "CONTACT US" });
     expect(heading).toBeInTheDocument();
   });
+
   it("renders heading styling", () => {
     renderComponent();
 
@@ -45,6 +47,7 @@ describe("Contact", () => {
     expect(email).toBeInTheDocument();
     expect(email.textContent).toEqual("www.help@ecommerceapp.com");
   });
+
   it("renders contact phone 1", () => {
     renderComponent();
 
@@ -52,6 +55,7 @@ describe("Contact", () => {
     expect(phone1).toBeInTheDocument();
     expect(phone1.textContent).toEqual("012-3456789");
   });
+
   it("renders contact phone 2", () => {
     renderComponent();
 

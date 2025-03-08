@@ -9,12 +9,11 @@ describe('UserMenu', () => {
   const renderComponent = () => {
     render(
       <MemoryRouter>
-        <UserMenu />
+        <UserMenu/>
       </MemoryRouter>
     );
   };
 
-  // testing the display of the page
   it('renders heading', () => {
     renderComponent();
 
@@ -22,7 +21,6 @@ describe('UserMenu', () => {
     expect(heading).toBeInTheDocument();
   });
 
-  // testing that the links to Profile and Orders are rendered
   it('renders link to Profile page', () => {
     renderComponent();
 
@@ -30,6 +28,7 @@ describe('UserMenu', () => {
     expect(profileLink).toBeInTheDocument();
     expect(profileLink).toHaveAttribute('href', '/dashboard/user/profile');
   });
+
   it('renders link to Orders page', () => {
     renderComponent();
 

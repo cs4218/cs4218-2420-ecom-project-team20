@@ -27,7 +27,7 @@ describe("Users", () => {
   it("renders heading", () => {
     render(
       <MemoryRouter>
-        <Users />
+        <Users/>
       </MemoryRouter>
     );
     expect(screen.getByText("All Users")).toBeInTheDocument();
