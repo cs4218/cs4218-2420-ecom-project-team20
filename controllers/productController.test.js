@@ -596,27 +596,27 @@ describe("Product Controller Advanced Functions Test", () => {
     slugify.mockImplementation((str) => `${str}-slug`);
   });
 
-  describe("productFiltersController", async () => {
+  describe("productFiltersController", () => {
 
   });
 
-  describe("productCountController", async () => {
+  describe("productCountController", () => {
 
   });
 
-  describe("productListController", async () => {
+  describe("productListController", () => {
 
   });
 
-  describe("searchProductController", async () => {
+  describe("searchProductController", () => {
 
   });
 
-  describe("realtedProductController", async () => {
+  describe("realtedProductController", () => {
 
   });
 
-  describe("productCategoryController", async () => {
+  describe("productCategoryController", () => {
 
   });
 });
@@ -641,11 +641,11 @@ describe("Product Controller Payment Functions Test", () => {
     };
   });
   
-  describe("braintreeTokenController", async () => {
+  describe("braintreeTokenController", () => {
 
   });
 
-  describe("brainTreePaymentController", async () => {
+  describe("brainTreePaymentController", () => {
 
   });
 });
