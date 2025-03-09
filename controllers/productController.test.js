@@ -81,8 +81,7 @@ jest.mock("../models/categoryModel.js", () => {
   return mockConstructor;
 });
 
-
-jest.mock('braintree', () => ({
+jest.mock("braintree", () => ({
   BraintreeGateway: jest.fn(() => {
     return {
       clientToken: {
@@ -94,7 +93,7 @@ jest.mock('braintree', () => ({
     };
   }),
   Environment: {
-    Sandbox: 'sandbox',
+    Sandbox: "sandbox",
   },
 }));
 
@@ -207,6 +206,18 @@ describe("Product Controller CRUD Test", () => {
       });
     });
 
+    it("should return success if product already exists", async () => {
+      productModel.findOne.mockResolvedValue({ name: "Test Product" });
+
+      await createProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Product Already Exists",
+      });
+    });
+
     it("should successfully create a new product", async () => {
       const mockProduct = {
         ...req.fields,
@@ -218,6 +229,7 @@ describe("Product Controller CRUD Test", () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
+      productModel.findOne.mockResolvedValue(null);
       productModel.mockImplementation(() => mockProduct);
 
       fs.readFileSync.mockReturnValue("mock-photo-data");
@@ -250,6 +262,7 @@ describe("Product Controller CRUD Test", () => {
         save: jest.fn().mockRejectedValue(mockError),
       };
 
+      productModel.findOne.mockResolvedValue(null);
       productModel.mockImplementation(() => mockProduct);
 
       await createProductController(req, res);
@@ -363,6 +376,23 @@ describe("Product Controller CRUD Test", () => {
       });
     });
 
+    it("should return error if product doesn't exist", async () => {
+      req.params = { slug: "test-single-product" };
+
+      productModel.findOne.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockResolvedValue(null),
+      });
+
+      await getSingleProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Product not found",
+      });
+    });
+
     it("should handle errors", async () => {
       req.params = { slug: "test-single-product" };
 
@@ -449,6 +479,7 @@ describe("Product Controller CRUD Test", () => {
         slug: slugify("Test Product"),
       };
 
+      productModel.findById.mockResolvedValue(mockProduct);
       productModel.findByIdAndDelete.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockProduct),
       });
@@ -462,13 +493,37 @@ describe("Product Controller CRUD Test", () => {
       });
     });
 
+    it("should return error if product does not exist", async () => {
+      req.params = {
+        id: "mock-nonexistent-pid"
+      };
+
+      productModel.findById = jest.fn().mockResolvedValue(null);
+
+      await deleteProductController(req, res);
+
+      expect(productModel.findById).toHaveBeenCalledWith("mock-nonexistent-pid");
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Product not found",
+      });
+      expect(productModel.findByIdAndDelete).not.toHaveBeenCalled();
+    });
+
     it("should handle errors", async () => {
       req.params = {
         pid: "mock-product-id",
       };
+      const mockProduct = {
+        ...req.fields,
+        _id: "mock-product-id",
+        slug: slugify("Test Product"),
+      };
       const mockError = new Error("Database Error");
       const spy = jest.spyOn(console, "log");
 
+      productModel.findById.mockResolvedValue(mockProduct)
       productModel.findByIdAndDelete.mockReturnValue({
         select: jest.fn().mockRejectedValue(mockError),
       });
@@ -552,6 +607,25 @@ describe("Product Controller CRUD Test", () => {
       });
     });
 
+    it("should return an error if trying to update an already existing product", async () => {
+      req.params = {
+        pid: "mock-product-id",
+      };
+
+      productModel.findOne.mockResolvedValue({ name: "Test Product" });
+
+      fs.readFileSync.mockReturnValue("mock-photo-updated-data");
+
+      await updateProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Product Already Exists",
+      });
+      expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    });
+
     it("should successfully update a product", async () => {
       req.params = {
         pid: "mock-product-id",
@@ -583,6 +657,7 @@ describe("Product Controller CRUD Test", () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
+      productModel.findOne.mockResolvedValue(null);
       productModel.findByIdAndUpdate.mockResolvedValue(mockUpdatedProduct);
 
       fs.readFileSync.mockReturnValue("mock-photo-updated-data");
@@ -625,6 +700,7 @@ describe("Product Controller CRUD Test", () => {
         },
       };
 
+      productModel.findOne.mockResolvedValue(null);
       productModel.findByIdAndUpdate.mockRejectedValue(mockError);
 
       await updateProductController(req, res);
@@ -977,11 +1053,11 @@ describe("Product Controller Advanced Functions Test", () => {
 
   describe("Payment Gateway API", () => {
     let req, res;
-  
+
     beforeEach(() => {
       jest.clearAllMocks();
       jest.useFakeTimers();
-  
+
       req = {
         body: {
           nonce: "mock-payment-method-nonce",
@@ -994,36 +1070,35 @@ describe("Product Controller Advanced Functions Test", () => {
           _id: "mock-user-id",
         },
       };
-  
+
       res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn().mockReturnThis(),
         json: jest.fn().mockReturnThis(),
       };
-  
     });
-  
+
     describe("braintreeTokenController", () => {
       it("should generate a token successfully", async () => {
         const mockToken = "mock-client-token";
         gateway.clientToken.generate.mockImplementation(({}, callback) => {
           callback(null, { clientToken: mockToken });
         });
-    
+
         await braintreeTokenController(req, res);
-    
+
         expect(gateway.clientToken.generate).toHaveBeenCalled();
         expect(res.send).toHaveBeenCalledWith({ clientToken: mockToken });
       });
-    
+
       it("should handle errors when generating a Braintree client token", async () => {
         const mockError = new Error("Braintree Error");
         gateway.clientToken.generate.mockImplementation((_, callback) => {
           callback(mockError, null);
         });
-    
+
         await braintreeTokenController(req, res);
-    
+
         expect(gateway.clientToken.generate).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith(mockError);
@@ -1035,24 +1110,29 @@ describe("Product Controller Advanced Functions Test", () => {
           throw new Error("Internal Server Error");
           callback(mockError, null);
         });
-    
+
         await braintreeTokenController(req, res);
-    
+
         expect(gateway.clientToken.generate).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ error: "Internal Server Error" });
+        expect(res.json).toHaveBeenCalledWith({
+          error: "Internal Server Error",
+        });
       });
     });
-  
+
     describe("brainTreePaymentController", () => {
       it("should handle payment requests for products successfully", async () => {
-        const mockResult = { success: true, transaction: { id: "mock-transaction-id" } };
+        const mockResult = {
+          success: true,
+          transaction: { id: "mock-transaction-id" },
+        };
         gateway.transaction.sale.mockImplementation((_, callback) => {
           callback(null, mockResult);
         });
-  
+
         await brainTreePaymentController(req, res);
-  
+
         expect(orderModel).toHaveBeenCalledWith({
           products: req.body.cart,
           payment: mockResult,
@@ -1060,15 +1140,15 @@ describe("Product Controller Advanced Functions Test", () => {
         });
         expect(res.json).toHaveBeenCalledWith({ ok: true });
       });
-  
+
       it("should handle payment-related errors", async () => {
         const mockError = new Error("Payment Error");
         gateway.transaction.sale.mockImplementation((_, callback) => {
           callback(mockError, null);
         });
-  
+
         await brainTreePaymentController(req, res);
-  
+
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.send).toHaveBeenCalledWith(mockError);
       });
@@ -1079,13 +1159,14 @@ describe("Product Controller Advanced Functions Test", () => {
           throw new Error("Internal Server Error");
           callback(mockError, null);
         });
-  
+
         await brainTreePaymentController(req, res);
-  
+
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ error: "Internal Server Error" });
+        expect(res.json).toHaveBeenCalledWith({
+          error: "Internal Server Error",
+        });
       });
     });
   });
 });
-
