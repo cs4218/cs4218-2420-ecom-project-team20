@@ -119,7 +119,7 @@ const UpdateProduct = () => {
                 bordered={false}
                 placeholder="Select a category"
                 size="large"
-                showSearch
+                showSearch={false}
                 className="form-select mb-3"
                 onChange={(value) => {
                   setCategory(value);
@@ -190,6 +190,11 @@ const UpdateProduct = () => {
                   value={price}
                   placeholder="write a Price"
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => setPrice(e.target.value)}
                 />
               </div>
@@ -199,6 +204,11 @@ const UpdateProduct = () => {
                   value={quantity}
                   placeholder="write a quantity"
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => setQuantity(e.target.value)}
                 />
               </div>
@@ -207,7 +217,7 @@ const UpdateProduct = () => {
                   bordered={false}
                   placeholder="Select Shipping "
                   size="large"
-                  showSearch
+                  showSearch={false}
                   className="form-select mb-3"
                   onChange={(value) => {
                     setShipping(value);

@@ -77,7 +77,7 @@ const CreateProduct = () => {
                 bordered={false}
                 placeholder="Select a category"
                 size="large"
-                showSearch
+                showSearch={false}
                 className="form-select mb-3"
                 data-testid="category-select"
                 onChange={(value) => {
@@ -140,6 +140,11 @@ const CreateProduct = () => {
                   placeholder="write a Price"
                   className="form-control"
                   min="0"
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => setPrice(e.target.value)}
                 />
               </div>
@@ -150,6 +155,11 @@ const CreateProduct = () => {
                   placeholder="write a quantity"
                   className="form-control"
                   min="0"
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => setQuantity(e.target.value)}
                 />
               </div>
@@ -158,7 +168,7 @@ const CreateProduct = () => {
                   bordered={false}
                   placeholder="Select Shipping"
                   size="large"
-                  showSearch
+                  showSearch={false}
                   className="form-select mb-3"
                   data-testid="shipping-select"
                   onChange={(value) => {
