@@ -10,7 +10,6 @@ import "@testing-library/jest-dom";
 import { AuthProvider, useAuth } from "./auth";
 import axios from "axios";
 
-// Mocking axios for testing purposes
 jest.mock("axios");
 
 const TestAuthComponent = () => {

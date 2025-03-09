@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import Products from "./Products";
 import axios from "axios";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import "@testing-library/jest-dom";
 import toast from "react-hot-toast";
 import React from "react";
@@ -89,17 +89,15 @@ describe("Products Component", () => {
 
     axios.get.mockResolvedValueOnce({ data: { products: mockProducts } });
 
-    render(
+    const { getByText, getByAltText } = render(
       <MemoryRouter>
         <Products />
       </MemoryRouter>
     );
 
-    await waitFor(() =>
-      expect(screen.getByText("Product 1")).toBeInTheDocument()
-    );
+    await waitFor(() => expect(getByText("Product 1")).toBeInTheDocument());
 
-    const productImage = screen.getByAltText("Product 1");
+    const productImage = getByAltText("Product 1");
     expect(productImage).toHaveAttribute(
       "src",
       "/api/v1/product/product-photo/1"
@@ -124,18 +122,18 @@ describe("Products Component", () => {
 
     axios.get.mockResolvedValueOnce({ data: { products: mockProducts } });
 
-    render(
+    const { getByText, getAllByRole } = render(
       <MemoryRouter>
         <Products />
       </MemoryRouter>
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Product 1")).toBeInTheDocument();
-      expect(screen.getByText("Product 2")).toBeInTheDocument();
+      expect(getByText("Product 1")).toBeInTheDocument();
+      expect(getByText("Product 2")).toBeInTheDocument();
     });
 
-    const productLinks = screen.getAllByRole("link");
+    const productLinks = getAllByRole("link");
     expect(productLinks.length).toBe(mockProducts.length);
   });
 
@@ -151,20 +149,26 @@ describe("Products Component", () => {
 
     axios.get.mockResolvedValueOnce({ data: { products: mockProducts } });
 
-    render(
-      <MemoryRouter>
-        <Products />
+    const { getByText } = render(
+      <MemoryRouter initialEntries={["/products"]}>
+        <Routes>
+          <Route path="/products" element={<Products />} />
+          <Route
+            path="/dashboard/admin/product/:slug"
+            element={
+              <div data-testid="product-detail">Product Detail Page</div>
+            }
+          />
+        </Routes>
       </MemoryRouter>
     );
 
-    const productLink = screen.getByText("Product 1").closest("a");
-    productLink.click();
+    await waitFor(() => expect(getByText("Product 1")).toBeInTheDocument());
+    const productText = getByText("Product 1");
+    const productLink = productText.closest("a");
 
-    // Wait for the navigation and check the correct path
-    await waitFor(() => {
-      expect(window.location.pathname).toBe(
-        "/dashboard/admin/product/product-1"
-      );
-    });
+    fireEvent.click(productLink);
+
+    expect(await screen.findByTestId("product-detail")).toBeInTheDocument();
   });
 });

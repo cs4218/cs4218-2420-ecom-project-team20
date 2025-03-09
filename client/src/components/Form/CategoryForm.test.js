@@ -4,7 +4,6 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 
-// Ensure axios is fully mocked
 jest.mock("axios");
 jest.mock("react-hot-toast", () => ({
   error: jest.fn(),

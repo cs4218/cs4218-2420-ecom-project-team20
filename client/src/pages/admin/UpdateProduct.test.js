@@ -13,7 +13,6 @@ jest.mock("../../components/Layout", () => ({ children }) => (
   <div>{children}</div>
 ));
 jest.mock("../../components/AdminMenu", () => () => <div />);
-global.URL.createObjectURL = jest.fn(() => "http://mocked-url.com/photo.jpg");
 
 describe("UpdateProduct Component", () => {
   beforeEach(() => {
