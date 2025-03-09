@@ -776,7 +776,28 @@ describe("Product Controller Advanced Functions Test", () => {
   describe("productListController", () => {
     it("should display a set number of products per page", async () => {
       req.params = {
-        page: 1,
+        page: 2,
+      };
+
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockProductsList),
+      });
+
+      await productListController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProductsList,
+      });
+    });
+
+    it("should still display page when no page number is provided", async () => {
+      req.params = {
+        page: null,
       };
 
       productModel.find.mockReturnValue({
