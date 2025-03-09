@@ -39,7 +39,13 @@ export const createProductController = async (req, res) => {
           .status(500)
           .send({ error: "photo is Required and should be less then 1mb" });
     }
-
+    const existingProduct = await productModel.findOne({ name });
+    if (existingProduct) {
+      return res.status(200).send({
+        success: false,
+        message: "Product Already Exists",
+      });
+    }
     const products = new productModel({ ...req.fields, slug: slugify(name) });
     if (photo) {
       products.photo.data = fs.readFileSync(photo.path);
@@ -92,11 +98,18 @@ export const getSingleProductController = async (req, res) => {
       .findOne({ slug: req.params.slug })
       .select("-photo")
       .populate("category");
-    res.status(200).send({
-      success: true,
-      message: "Single Product Fetched",
-      product,
-    });
+    if (product) {
+      res.status(200).send({
+        success: true,
+        message: "Single Product Fetched",
+        product,
+      });
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -128,6 +141,13 @@ export const productPhotoController = async (req, res) => {
 //delete controller
 export const deleteProductController = async (req, res) => {
   try {
+    const existingProduct = await productModel.findById(req.params.id);
+    if (!existingProduct) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
     await productModel.findByIdAndDelete(req.params.pid).select("-photo");
     res.status(200).send({
       success: true,
@@ -166,7 +186,13 @@ export const updateProductController = async (req, res) => {
           .status(500)
           .send({ error: "photo is Required and should be less then 1mb" });
     }
-
+    const existingProduct = await productModel.findOne({ name });
+    if (existingProduct) {
+      return res.status(500).send({
+        success: false,
+        message: "Product Already Exists",
+      });
+    }
     const products = await productModel.findByIdAndUpdate(
       req.params.pid,
       { ...req.fields, slug: slugify(name) },
