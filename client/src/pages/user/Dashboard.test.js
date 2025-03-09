@@ -42,11 +42,13 @@ describe('Dashboard', () => {
     const name = screen.getByRole('heading', { name: testUser.name });
     expect(name).toBeInTheDocument();
   });
+
   it('renders email of user', () => {
     renderComponent();
     const email = screen.getByRole('heading', { name: testUser.email });
     expect(email).toBeInTheDocument();
   });
+
   it('renders address of user', () => {
     renderComponent();
     const address = screen.getByRole('heading', { name: testUser.address });

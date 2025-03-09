@@ -86,6 +86,7 @@ describe("ProductDetails", () => {
     expect(productDetailsHeading).toBeInTheDocument();
     expect(similarProductsHeading).toBeInTheDocument();
   });
+
   it("renders details of product", async () => {
     axios.get.mockImplementation((url) => {
       if (url.includes('/get-product/')) {
@@ -112,6 +113,7 @@ describe("ProductDetails", () => {
     expect(price).toBeInTheDocument();
     expect(category).toBeInTheDocument();
   });
+
   it("renders image of product", async () => {
     axios.get.mockImplementation((url) => {
       if (url.includes('/get-product/')) {
@@ -144,6 +146,7 @@ describe("ProductDetails", () => {
     expect(similarProductsButtons.length).toEqual(0);
     expect(message).toBeInTheDocument();
   });
+
   it("renders similar products", async () => {
     axios.get.mockImplementation((url) => {
       if (url.includes('/get-product/')) {
@@ -173,6 +176,7 @@ describe("ProductDetails", () => {
     const similarProductsButtons = await waitFor(() => screen.getAllByRole("button", { name: "More Details" }));
     expect(similarProductsButtons.length).toEqual(mockSimilarProducts.length);
   });
+
   it("renders images of similar products", async () => {
     axios.get.mockImplementation((url) => {
       if (url.includes('/get-product/')) {
@@ -190,7 +194,8 @@ describe("ProductDetails", () => {
       expect(image.alt).toEqual(`${ similarProduct.name }`);
     });
   });
-  it('links buttons to relevant similar product detail pages', async () => {
+
+  it('renders and links buttons to relevant product detail pages', async () => {
     axios.get.mockImplementation((url) => {
       if (url.includes('/get-product/')) {
         return Promise.resolve({ data: { product: mockProduct } });
