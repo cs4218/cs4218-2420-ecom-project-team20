@@ -20,16 +20,6 @@ const UpdateProduct = () => {
   const [photo, setPhoto] = useState("");
   const [id, setId] = useState("");
 
-  const [initialProductData, setInitialProductData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    quantity: "",
-    shipping: "",
-    category: "",
-    photo: null,
-  });
-
   //get single product
   const getSingleProduct = async () => {
     try {
@@ -43,15 +33,6 @@ const UpdateProduct = () => {
       setQuantity(data.product.quantity);
       setShipping(data.product.shipping);
       setCategory(data.product.category._id);
-
-      setInitialProductData({
-        name: data.product.name,
-        description: data.product.description,
-        price: data.product.price,
-        quantity: data.product.quantity,
-        shipping: data.product.shipping,
-        category: data.product.category._id,
-      });
     } catch (error) {
       console.log(error);
     }
