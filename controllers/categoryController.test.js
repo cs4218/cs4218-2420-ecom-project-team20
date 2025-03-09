@@ -1,5 +1,6 @@
 import categoryModel from "../models/categoryModel.js";
 import slugify from "slugify";
+import mongoose from "mongoose";
 import {
   createCategoryController,
   updateCategoryController,
@@ -8,8 +9,28 @@ import {
   deleteCategoryController
 } from "./categoryController.js";
 
-jest.mock("../models/categoryModel.js");
+jest.mock("../models/categoryModel.js", () => {
+  const mockConstructor = jest.fn().mockImplementation(function (data) {
+    return {
+      ...data,
+      save: jest.fn().mockResolvedValue(data),
+    };
+  });
+  mockConstructor.findOne = jest.fn();
+  mockConstructor.findById = jest.fn();
+  mockConstructor.findByIdAndUpdate = jest.fn();
+  mockConstructor.create = jest.fn();
+  return mockConstructor;
+});
+
 jest.mock("slugify");
+jest.mock("mongoose", () => ({
+  models: {},
+  model: jest.fn(),
+  Schema: jest.fn(),
+  connect: jest.fn(),
+  connection: { close: jest.fn() },
+}));
 
 describe("Category Controller Tests", () => {
   let mockReq;
@@ -34,6 +55,12 @@ describe("Category Controller Tests", () => {
     categoryModel.findByIdAndDelete = jest.fn();
 
     slugify.mockImplementation((str) => `${str}-slug`);
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+    jest.resetModules();
   });
 
   describe("createCategoryController", () => {

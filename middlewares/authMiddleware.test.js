@@ -3,7 +3,19 @@ import userModel from "../models/userModel.js";
 import { requireSignIn, isAdmin } from "./authMiddleware.js";
 
 jest.mock("jsonwebtoken");
-jest.mock("../models/userModel.js");
+jest.mock("../models/userModel.js", () => {
+  const mockConstructor = jest.fn().mockImplementation(function (data) {
+    return {
+      ...data,
+      save: jest.fn().mockResolvedValue(data),
+    };
+  });
+  mockConstructor.findOne = jest.fn();
+  mockConstructor.findById = jest.fn();
+  mockConstructor.findByIdAndUpdate = jest.fn();
+  mockConstructor.create = jest.fn();
+  return mockConstructor;
+});
 
 describe("Authentication Middleware Tests", () => {
   let mockReq;
