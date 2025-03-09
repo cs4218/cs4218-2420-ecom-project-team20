@@ -24,12 +24,12 @@ module.exports = {
   testMatch: ["<rootDir>/client/src/**/*.test.js"],
 
   // jest code coverage
-  // collectCoverage: true,
-  // collectCoverageFrom: ["client/src/pages/Auth/**"],
-  // coverageThreshold: {
-  //   global: {
-  //     lines: 100,
-  //     functions: 100,
-  //   },
-  // },
+  collectCoverage: true,
+  collectCoverageFrom: ["client/src/**"],
+  coverageThreshold: {
+    global: {
+      lines: 100,
+      functions: 100,
+    },
+  },
 };
