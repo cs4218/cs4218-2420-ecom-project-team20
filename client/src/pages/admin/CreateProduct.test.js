@@ -5,7 +5,6 @@ import axios from "axios";
 import { MemoryRouter } from "react-router-dom";
 import toast from "react-hot-toast";
 import React from "react";
-import "antd/dist/antd.css";
 
 jest.mock("axios");
 jest.mock("react-hot-toast", () => ({
@@ -77,6 +76,7 @@ describe("CreateProduct Component", () => {
   ];
 
   it("renders the form fields correctly", () => {
+    axios.get.mockResolvedValueOnce({ data: { category: mockCategories } });
     const { getByPlaceholderText, getByTestId } = render(
       <MemoryRouter>
         <CreateProduct />

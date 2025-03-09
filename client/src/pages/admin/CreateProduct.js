@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { Select } from "antd";
 import { useNavigate } from "react-router-dom";
-const { Option } = Select;
+// const { Option } = Select;
 
 const CreateProduct = () => {
   const navigate = useNavigate();
@@ -52,11 +52,9 @@ const CreateProduct = () => {
         productData
       );
       if (data.success) {
-        console.log("success message: ", data?.message);
         toast.success("Product Created Successfully");
         navigate("/dashboard/admin/products");
       } else {
-        console.log("fail message: ", data?.message);
         toast.error(data?.message);
       }
     } catch (error) {
@@ -76,7 +74,7 @@ const CreateProduct = () => {
             <h1>Create Product</h1>
             <div className="m-1 w-75">
               <Select
-                variant={false}
+                bordered={false}
                 placeholder="Select a category"
                 size="large"
                 showSearch
@@ -157,7 +155,7 @@ const CreateProduct = () => {
               </div>
               <div className="mb-3">
                 <Select
-                  variant={false}
+                  bordered={false}
                   placeholder="Select Shipping"
                   size="large"
                   showSearch
