@@ -123,7 +123,7 @@ describe("Search", () => {
     });
   });
 
-  it('renders and links buttons to search result product detail pages', async () => {
+  it("renders and links buttons to search result product detail pages", async () => {
     renderComponent();
 
     mockSearchResults.map(async (product) => {

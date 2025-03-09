@@ -124,6 +124,7 @@ describe("Profile", () => {
     });
     const form = screen.getByLabelText("profile-form");
     fireEvent.submit(form);
+
     await waitFor(() => expect(axios.put).toHaveBeenCalled());
   });
 
@@ -151,6 +152,7 @@ describe("Profile", () => {
 
   it("does not allow form submission when len(password) == 6", async () => {
     renderComponent();
+
     fireEvent.change(screen.getByPlaceholderText("Enter Your Name"), {
       target: { value: newUser.name },
     });

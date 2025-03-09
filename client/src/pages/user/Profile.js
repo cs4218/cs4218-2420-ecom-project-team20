@@ -71,7 +71,7 @@ const Profile = () => {
                     phone,
                     address,
                   }) }
-                data-testid="form"  // TODO: Change name of testid
+                data-testid="form"
                 aria-label="profile-form">
                 <h4 className="title">USER PROFILE</h4>
                 <div className="mb-3">
