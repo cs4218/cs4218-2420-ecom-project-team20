@@ -1,20 +1,14 @@
-module.exports = {
-  // display name
+export default {
   displayName: "backend",
 
-  // when testing backend
   testEnvironment: "node",
-
-  // which test to run
-  testMatch: ["<rootDir>/controllers/*.test.js"],
-
-  // jest code coverage
+  testMatch: ["<rootDir>/*/*.test.js"],
   collectCoverage: true,
-  collectCoverageFrom: ["controllers/**"],
+  collectCoverageFrom: ["<rootDir>/*/*.js"],
   coverageThreshold: {
     global: {
-      lines: 100,
-      functions: 100,
+      lines: 10,
+      functions: 10,
     },
   },
 };

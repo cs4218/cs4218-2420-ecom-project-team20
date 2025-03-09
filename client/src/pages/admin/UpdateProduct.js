@@ -30,7 +30,6 @@ const UpdateProduct = () => {
       setId(data.product._id);
       setDescription(data.product.description);
       setPrice(data.product.price);
-      setPrice(data.product.price);
       setQuantity(data.product.quantity);
       setShipping(data.product.shipping);
       setCategory(data.product.category._id);
@@ -70,19 +69,20 @@ const UpdateProduct = () => {
       productData.append("quantity", quantity);
       photo && productData.append("photo", photo);
       productData.append("category", category);
-      const { data } = axios.put(
+      productData.append("shipping", shipping);
+      const { data } = await axios.put(
         `/api/v1/product/update-product/${id}`,
         productData
       );
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
         toast.success("Product Updated Successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error("something went wrong");
+      toast.error("Something went wrong");
     }
   };
 
@@ -94,8 +94,12 @@ const UpdateProduct = () => {
       const { data } = await axios.delete(
         `/api/v1/product/delete-product/${id}`
       );
-      toast.success("Product DEleted Succfully");
-      navigate("/dashboard/admin/products");
+      if (data?.success) {
+        toast.success("Product deleted successfully");
+        navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
+      }
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
@@ -115,7 +119,7 @@ const UpdateProduct = () => {
                 bordered={false}
                 placeholder="Select a category"
                 size="large"
-                showSearch
+                showSearch={false}
                 className="form-select mb-3"
                 onChange={(value) => {
                   setCategory(value);
@@ -134,6 +138,7 @@ const UpdateProduct = () => {
                   <input
                     type="file"
                     name="photo"
+                    id="product-photo"
                     accept="image/*"
                     onChange={(e) => setPhoto(e.target.files[0])}
                     hidden
@@ -186,6 +191,11 @@ const UpdateProduct = () => {
                   value={price}
                   placeholder="write a Price"
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => setPrice(e.target.value)}
                 />
               </div>
@@ -195,6 +205,11 @@ const UpdateProduct = () => {
                   value={quantity}
                   placeholder="write a quantity"
                   className="form-control"
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => setQuantity(e.target.value)}
                 />
               </div>
@@ -203,7 +218,7 @@ const UpdateProduct = () => {
                   bordered={false}
                   placeholder="Select Shipping "
                   size="large"
-                  showSearch
+                  showSearch={false}
                   className="form-select mb-3"
                   onChange={(value) => {
                     setShipping(value);

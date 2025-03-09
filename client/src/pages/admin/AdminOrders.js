@@ -13,24 +13,34 @@ const AdminOrders = () => {
     "Not Process",
     "Processing",
     "Shipped",
-    "deliverd",
-    "cancel",
+    "Delivered",
+    "Cancelled",
   ]);
-  const [changeStatus, setCHangeStatus] = useState("");
+  const [changeStatus, setChangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
-  const [auth, setAuth] = useAuth();
+  // const [auth, setAuth] = useAuth();
+  // const authResult = useAuth();
+  // const auth = authResult?.[0] || { user: {} };
+  // console.log("Auth Token:", auth?.token); // Check if token is set
+
   const getOrders = async () => {
     try {
       const { data } = await axios.get("/api/v1/auth/all-orders");
       setOrders(data);
+      console.log(data);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong in getting orders");
     }
   };
 
   useEffect(() => {
-    if (auth?.token) getOrders();
-  }, [auth?.token]);
+    getOrders();
+  }, []);
+
+  // useEffect(() => {
+  //   if (auth?.token) getOrders();
+  // }, [auth?.token]);
 
   const handleChange = async (orderId, value) => {
     try {
@@ -38,8 +48,10 @@ const AdminOrders = () => {
         status: value,
       });
       getOrders();
+      toast.success(data.message);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong in updating status");
     }
   };
   return (
@@ -50,16 +62,18 @@ const AdminOrders = () => {
         </div>
         <div className="col-md-9">
           <h1 className="text-center">All Orders</h1>
-          {orders?.map((o, i) => {
-            return (
-              <div className="border shadow">
+          {orders.length === 0 ? (
+            <p>No orders found</p> // Or any other message
+          ) : (
+            orders.map((o, i) => (
+              <div className="border shadow" key={o._id}>
                 <table className="table">
                   <thead>
                     <tr>
                       <th scope="col">#</th>
                       <th scope="col">Status</th>
                       <th scope="col">Buyer</th>
-                      <th scope="col"> date</th>
+                      <th scope="col">Date</th>
                       <th scope="col">Payment</th>
                       <th scope="col">Quantity</th>
                     </tr>
@@ -108,8 +122,8 @@ const AdminOrders = () => {
                   ))}
                 </div>
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
       </div>
     </Layout>
