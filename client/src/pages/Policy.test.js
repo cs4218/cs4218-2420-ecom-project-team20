@@ -19,16 +19,33 @@ jest.mock("../context/search", () => ({
   useSearch: jest.fn(() => [{ keyword: "" }, jest.fn()]), // Mock useSearch hook to return null state and a mock function
 }));
 
-describe("Register Component", () => {
+jest.mock("../components/Layout", () => ({ title, children }) => (
+  <div data-testid="layout" data-title={title}>
+    {children}
+  </div>
+));
+
+describe("Policy page", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
+    
     it("renders Policy page without crashing", () => {
-    render(<MemoryRouter initialEntries={["/policy"]}>
-        <Routes>
-        <Route path="/policy" element={<Policy />} />
-        </Routes>
-    </MemoryRouter>);
-    expect(screen.getByText("Privacy Policy")).toBeInTheDocument();
+      render(<MemoryRouter initialEntries={["/policy"]}>
+          <Routes>
+          <Route path="/policy" element={<Policy />} />
+          </Routes>
+      </MemoryRouter>);
+      const layout = screen.getByTestId("layout");
+      expect(layout).toHaveAttribute("data-title", "Privacy Policy");
+    });
+
+    it("renders the paragraph text correctly", () => {
+      render(<MemoryRouter initialEntries={["/policy"]}>
+          <Routes>
+          <Route path="/policy" element={<Policy />} />
+          </Routes>
+      </MemoryRouter>);
+      expect(screen.getByText("add privacy policy")).toBeInTheDocument();
     });
 });
