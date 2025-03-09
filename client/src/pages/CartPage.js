@@ -4,7 +4,6 @@ import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import DropIn from "braintree-web-drop-in-react";
-import { AiFillWarning } from "react-icons/ai";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "../styles/CartStyles.css";
@@ -78,7 +77,7 @@ const CartPage = () => {
     }
   };
   return (
-    <Layout>
+    <Layout title={"Your Cart"}>
       <div className=" cart-page">
         <div className="row">
           <div className="col-md-12">
@@ -91,7 +90,7 @@ const CartPage = () => {
                   ? `You Have ${cart.length} items in your cart ${
                       auth?.token ? "" : "please login to checkout !"
                     }`
-                  : " Your Cart Is Empty"}
+                  : "Your Cart is Empty"}
               </p>
             </h1>
           </div>
@@ -162,7 +161,7 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Plase Login to checkout
+                      Please Login to checkout
                     </button>
                   )}
                 </div>
