@@ -5,13 +5,22 @@ import {
   getProductController,
   getSingleProductController,
   productPhotoController,
+  productFiltersController,
+  braintreeTokenController,
+  productCountController,
+  productListController,
+  searchProductController,
+  realtedProductController,
+  productCategoryController,
 } from "./productController.js";
 import productModel from "../models/productModel.js";
+import categoryModel from "../models/categoryModel.js";
 import slugify from "slugify";
 import fs from "fs";
 import braintree from "braintree";
 
 jest.mock("../models/productModel.js");
+jest.mock("../models/categoryModel.js");
 jest.mock("braintree", () => {
   return {
     BraintreeGateway: jest.fn().mockImplementation(() => {
@@ -35,7 +44,6 @@ jest.mock("fs", () => ({
   readFileSync: jest.fn().mockReturnValue("mock-photo-data"),
 }));
 
-
 describe("Product Controller CRUD Test", () => {
   let req, res;
 
@@ -48,7 +56,7 @@ describe("Product Controller CRUD Test", () => {
         name: "Test Product",
         description: "This is description of test product",
         price: 99.99,
-        category: "test-object-id",
+        category: "mock-category-id",
         quantity: 10,
         shipping: true,
       },
@@ -205,7 +213,7 @@ describe("Product Controller CRUD Test", () => {
           slug: slugify("Test Product 1"),
           description: "This is test product 1",
           price: 100,
-          category: "test-object-id",
+          category: "mock-category-id",
           quantity: 2,
           photo: {},
           shipping: true,
@@ -215,7 +223,7 @@ describe("Product Controller CRUD Test", () => {
           slug: slugify("Test Product 2"),
           description: "This is test product 2",
           price: 20,
-          category: "test-object-id",
+          category: "mock-category-id",
           quantity: 5,
           photo: {},
           shipping: false,
@@ -273,7 +281,7 @@ describe("Product Controller CRUD Test", () => {
         slug: "test-single-product",
         description: "This is test product 1",
         price: 100,
-        category: "test-object-id",
+        category: "mock-category-id",
         quantity: 2,
         photo: {},
         shipping: true,
@@ -406,7 +414,7 @@ describe("Product Controller CRUD Test", () => {
 
       await deleteProductController(req, res);
 
-      expect(spy).toHaveBeenCalledWith(mockError)
+      expect(spy).toHaveBeenCalledWith(mockError);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
@@ -485,8 +493,8 @@ describe("Product Controller CRUD Test", () => {
 
     it("should successfully update a product", async () => {
       req.params = {
-        pid: "mock-product-id"
-      }
+        pid: "mock-product-id",
+      };
       req.fields = {
         name: "Test Updated Product",
         description: "This is updated description of test product",
@@ -537,8 +545,8 @@ describe("Product Controller CRUD Test", () => {
       const spy = jest.spyOn(console, "log");
 
       req.params = {
-        pid: "mock-product-id"
-      }
+        pid: "mock-product-id",
+      };
       req.fields = {
         name: "Test Updated Product",
         description: "This is updated description of test product",
@@ -573,9 +581,8 @@ describe("Product Controller CRUD Test", () => {
   });
 });
 
-/*
 describe("Product Controller Advanced Functions Test", () => {
-  let req, res;
+  let req, res, mockProductsList;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -583,46 +590,312 @@ describe("Product Controller Advanced Functions Test", () => {
 
     req = {
       body: {
-        checked: 0,
-        radio: 0,
+        checked: [],
+        radio: [],
       },
     };
 
     res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     };
 
     slugify.mockImplementation((str) => `${str}-slug`);
+
+    mockProductsList = [
+      {
+        name: "Test Product 1",
+        slug: slugify("Test Product 1"),
+        description: "This is test product 1",
+        price: 50,
+        category: "mock-category-id",
+        quantity: 2,
+        photo: {},
+        shipping: true,
+      },
+      {
+        name: "Test Product 2",
+        slug: slugify("Test Product 2"),
+        description: "This is test product 2",
+        price: 75,
+        category: "mock-category-id",
+        quantity: 5,
+        photo: {},
+        shipping: false,
+      },
+      {
+        name: "Test Product 3",
+        slug: slugify("Test Product 3"),
+        description: "This is test product 3",
+        price: 40,
+        category: "mock-category-id",
+        quantity: 3,
+        photo: {},
+        shipping: true,
+      },
+    ];
   });
 
   describe("productFiltersController", () => {
+    it("should filter products based on categories and prices", async () => {
+      req.body.checked = ["mock-category-1", "mock-category-2"];
+      req.body.radio = [0, 99];
 
+      const mockArgs = {
+        category: req.body.checked,
+        price: { $gte: req.body.radio[0], $lte: req.body.radio[1] },
+      };
+
+      productModel.find.mockResolvedValue(mockProductsList);
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProductsList,
+      });
+      expect(productModel.find).toHaveBeenCalledWith(mockArgs);
+    });
+
+    it("should handle errors", async () => {
+      const mockError = new Error("Filter Error");
+      const spy = jest.spyOn(console, "log");
+
+      productModel.find.mockRejectedValue(mockError);
+
+      await productFiltersController(req, res);
+
+      expect(spy).toHaveBeenCalledWith(mockError);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error WHile Filtering Products",
+        error: mockError,
+      });
+    });
   });
 
   describe("productCountController", () => {
+    it("should show total number of products", async () => {
+      productModel.find.mockReturnValue({
+        estimatedDocumentCount: jest.fn().mockReturnValue(10),
+      });
 
+      await productCountController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        total: 10,
+      });
+    });
+
+    it("should handle errors", async () => {
+      const mockError = new Error("Count Error");
+      const spy = jest.spyOn(console, "log");
+
+      productModel.find.mockReturnValue({
+        estimatedDocumentCount: jest.fn().mockRejectedValue(mockError),
+      });
+
+      await productCountController(req, res);
+
+      expect(spy).toHaveBeenCalledWith(mockError);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error in product count",
+        error: mockError,
+      });
+    });
   });
 
   describe("productListController", () => {
+    it("should display a set number of products per page", async () => {
+      req.params = {
+        page: 1,
+      };
 
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockProductsList),
+      });
+
+      await productListController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProductsList,
+      });
+    });
+
+    it("should handle errors", async () => {
+      req.params = {
+        page: 1,
+      };
+      const mockError = new Error("Product List Error");
+      const spy = jest.spyOn(console, "log");
+
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(mockError),
+      });
+
+      await productListController(req, res);
+
+      expect(spy).toHaveBeenCalledWith(mockError);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "error in per page ctrl",
+        error: mockError,
+      });
+    });
   });
 
   describe("searchProductController", () => {
+    it("should search for products based on keywords", async () => {
+      req.params = {
+        keyword: "Test Product",
+      };
 
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockProductsList),
+      });
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledWith(mockProductsList);
+    });
+
+    it("should handle errors", async () => {
+      req.params = {
+        keyword: "Test Product",
+      };
+      const mockError = new Error("Search Error");
+      const spy = jest.spyOn(console, "log");
+
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockRejectedValue(mockError),
+      });
+
+      await searchProductController(req, res);
+
+      expect(spy).toHaveBeenCalledWith(mockError);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error In Search Product API",
+        error: mockError,
+      });
+    });
   });
 
   describe("realtedProductController", () => {
+    it("should find similar products", async () => {
+      req.params = {
+        pid: "mock-product-id",
+        cid: "mock-category-id",
+      };
 
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockResolvedValue(mockProductsList),
+      });
+
+      await realtedProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProductsList,
+      });
+    });
+
+    it("should handle errors", async () => {
+      req.params = {
+        pid: "mock-product-id",
+        cid: "mock-category-id",
+      };
+      const mockError = new Error("Related Products Error");
+      const spy = jest.spyOn(console, "log");
+
+      productModel.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockRejectedValue(mockError),
+      });
+
+      await realtedProductController(req, res);
+
+      expect(spy).toHaveBeenCalledWith(mockError);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "error while geting related product",
+        error: mockError,
+      });
+    });
   });
 
   describe("productCategoryController", () => {
+    it("should find products by category", async () => {
+      req.params = {
+        slug: "mock-category-slug",
+      };
+      const mockCategory = {
+        name: "Test Category",
+        slug: "mock-category-slug",
+      };
+      categoryModel.findOne.mockResolvedValue(mockCategory);
+      productModel.find.mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockProductsList),
+      });
 
+      await productCategoryController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        category: mockCategory,
+        products: mockProductsList,
+      });
+    });
+
+    it("should handle errors", async () => {
+      req.params = {
+        slug: "mock-category-slug",
+      };
+      const mockError = new Error("Category Error");
+      const spy = jest.spyOn(console, "log");
+
+      productModel.find.mockReturnValue({
+        populate: jest.fn().mockRejectedValue(mockError),
+      });
+
+      await productCategoryController(req, res);
+
+      expect(spy).toHaveBeenCalledWith(mockError);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error While Getting products",
+        error: mockError,
+      });
+    });
   });
 });
 
 describe("Product Controller Payment Functions Test", () => {
-  let req, res;
+  let req, res, gateway;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -632,21 +905,42 @@ describe("Product Controller Payment Functions Test", () => {
       body: {
         nonce: "mock-payment-method-nonce",
         cart: ["mock-product-1", "mock-product-2"],
-      }
+      },
     };
 
     res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
     };
-  });
-  
-  describe("braintreeTokenController", () => {
 
+    gateway = braintree.BraintreeGateway();
+  });
+
+  describe("braintreeTokenController", () => {
+    it("should generate a token successfully", async () => {
+      // gateway.clientToken.generate.mockImplementation(
+      //   ({}, mockHandleResponse) => {
+      //     mockHandleResponse(null, { token: "mock-client-token" });
+      //   }
+      // );
+      // await braintreeTokenController(req, res);
+      // expect(res.send).toHaveBeenCalledWith({ token: "mock-client-token" });
+    });
+
+    it("should handle errors when generating a Braintree client token", async () => {
+      // const mockError = new Error("Braintree Error");
+      // gateway.clientToken.generate.mockImplementation((_, callback) => {
+      //   callback(mockError, null);
+      // });
+      // await braintreeTokenController(req, res);
+      // expect(res.status).toHaveBeenCalledWith(500);
+      // expect(res.send).toHaveBeenCalledWith(mockError);
+    });
   });
 
   describe("brainTreePaymentController", () => {
+    it("should handle payment requests for products successfully", async () => {});
 
+    it("should handle payment-related errors", async () => {});
   });
 });
- */
