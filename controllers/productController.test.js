@@ -18,7 +18,6 @@ import categoryModel from "../models/categoryModel.js";
 import slugify from "slugify";
 import fs from "fs";
 import braintree from "braintree";
-import { it } from "date-fns/locale";
 
 jest.mock("../models/productModel.js");
 jest.mock("../models/categoryModel.js");
