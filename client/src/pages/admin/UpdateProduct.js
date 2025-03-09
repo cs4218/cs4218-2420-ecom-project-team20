@@ -20,6 +20,16 @@ const UpdateProduct = () => {
   const [photo, setPhoto] = useState("");
   const [id, setId] = useState("");
 
+  const [initialProductData, setInitialProductData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    quantity: "",
+    shipping: "",
+    category: "",
+    photo: null,
+  });
+
   //get single product
   const getSingleProduct = async () => {
     try {
@@ -30,10 +40,18 @@ const UpdateProduct = () => {
       setId(data.product._id);
       setDescription(data.product.description);
       setPrice(data.product.price);
-      setPrice(data.product.price);
       setQuantity(data.product.quantity);
       setShipping(data.product.shipping);
       setCategory(data.product.category._id);
+
+      setInitialProductData({
+        name: data.product.name,
+        description: data.product.description,
+        price: data.product.price,
+        quantity: data.product.quantity,
+        shipping: data.product.shipping,
+        category: data.product.category._id,
+      });
     } catch (error) {
       console.log(error);
     }
@@ -70,19 +88,20 @@ const UpdateProduct = () => {
       productData.append("quantity", quantity);
       photo && productData.append("photo", photo);
       productData.append("category", category);
-      const { data } = axios.put(
+      productData.append("shipping", shipping);
+      const { data } = await axios.put(
         `/api/v1/product/update-product/${id}`,
         productData
       );
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
         toast.success("Product Updated Successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error("something went wrong");
+      toast.error("Something went wrong");
     }
   };
 
@@ -94,8 +113,12 @@ const UpdateProduct = () => {
       const { data } = await axios.delete(
         `/api/v1/product/delete-product/${id}`
       );
-      toast.success("Product DEleted Succfully");
-      navigate("/dashboard/admin/products");
+      if (data?.success) {
+        toast.success("Product deleted successfully");
+        navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
+      }
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
