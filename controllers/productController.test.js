@@ -19,8 +19,51 @@ import slugify from "slugify";
 import fs from "fs";
 import braintree from "braintree";
 
-jest.mock("../models/productModel.js");
-jest.mock("../models/categoryModel.js");
+jest.mock("../models/orderModel.js", () => {
+  const mockConstructor = jest.fn().mockImplementation(function (data) {
+    return {
+      ...data,
+      save: jest.fn().mockResolvedValue(data),
+    };
+  });
+  mockConstructor.findOne = jest.fn();
+  mockConstructor.findById = jest.fn();
+  mockConstructor.findByIdAndUpdate = jest.fn();
+  mockConstructor.create = jest.fn();
+  return mockConstructor;
+});
+
+jest.mock("../models/productModel.js", () => {
+  const mockConstructor = jest.fn().mockImplementation(function (data) {
+    return {
+      ...data,
+      save: jest.fn().mockResolvedValue(data),
+    };
+  });
+  mockConstructor.find = jest.fn();
+  mockConstructor.findOne = jest.fn();
+  mockConstructor.findById = jest.fn();
+  mockConstructor.findByIdAndUpdate = jest.fn();
+  mockConstructor.create = jest.fn();
+  mockConstructor.findByIdAndDelete = jest.fn();
+  return mockConstructor;
+});
+
+jest.mock("../models/categoryModel.js", () => {
+  const mockConstructor = jest.fn().mockImplementation(function (data) {
+    return {
+      ...data,
+      save: jest.fn().mockResolvedValue(data),
+    };
+  });
+  mockConstructor.findOne = jest.fn();
+  mockConstructor.findById = jest.fn();
+  mockConstructor.findByIdAndUpdate = jest.fn();
+  mockConstructor.create = jest.fn();
+  return mockConstructor;
+});
+
+
 jest.mock("braintree", () => {
   return {
     BraintreeGateway: jest.fn().mockImplementation(() => {
