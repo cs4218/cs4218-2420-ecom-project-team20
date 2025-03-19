@@ -6,6 +6,7 @@ const mockingoose = require('mockingoose');
 
 describe('Product Model Tests', () => {
 
+
   it('should require a name', () => {
     const product = new Product({});
     const error = product.validateSync();
