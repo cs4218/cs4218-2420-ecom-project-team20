@@ -2,7 +2,7 @@ export default {
   displayName: "backend",
 
   testEnvironment: "node",
-  testMatch: ["<rootDir>/*/*.test.js"],
+  testMatch: ["<rootDir>/*/*.test.js", "<rootDir>/*/*.integration.test.js"],
   collectCoverage: true,
   collectCoverageFrom: ["<rootDir>/*/*.js"],
   coverageThreshold: {
