@@ -32,7 +32,7 @@ test.describe("Update profile details", () => {
 
   test("should be able to enter new details", async ({ page }) => {
     await login(page, testUser);
-    await navigateToProfile(page);
+    await navigateToProfile(page, testUser);
 
     const nameTextbox = page.getByRole("textbox", { name: "Enter Your Name" });
     const passwordTextbox = page.getByRole("textbox", { name: "Enter Your Password" });
@@ -82,25 +82,23 @@ async function login(page, user) {
   await loginTab.click();
 
   const emailTextbox = page.getByRole('textbox', { name: 'Enter Your Email' });
-  const passwordTextbox = page.getByRole('textbox', { name: 'Enter Your Password' });
-  const loginButton = page.getByRole('button', { name: 'LOGIN' });
-
   await emailTextbox.click();
   await emailTextbox.fill(user.email);
-  await emailTextbox.press("Tab");
+
+  const passwordTextbox = page.getByRole('textbox', { name: 'Enter Your Password' });
+  await passwordTextbox.click();
   await passwordTextbox.fill(user.password);
+
+  const loginButton = page.getByRole('button', { name: 'LOGIN' });
   await loginButton.click();
+  await expect(page.getByText('🙏Logged in successfully')).toBeVisible();
 }
 
 async function navigateToProfile(page, user) {
-  const userTab = page.getByRole("button", { name: user.name });
-  await userTab.click();
+  await page.goto("http://localhost:3000/dashboard/user/profile");
 
-  const dashboardTab = page.getByRole("link", { name: "Dashboard" });
-  await dashboardTab.click();
-
-  const profileTab = page.getByRole("link", { name: "Profile" })
-  await profileTab.click();
+  const heading = page.getByRole("heading", { name: "USER PROFILE" });
+  await expect(heading).toBeVisible();
 }
 
 async function editProfile(page, newUser) {
