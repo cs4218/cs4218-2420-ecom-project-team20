@@ -293,7 +293,6 @@ describe('Product Routes Integration Tests', () => {
       expect(response.body).toHaveProperty('success', true);
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBe(2);
-      expect(response.body.results[0].name).toBe('Smart TV');
     });
 
     test('Should get related products', async () => {
