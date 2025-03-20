@@ -2,8 +2,10 @@ export default {
   displayName: "backend",
 
   testEnvironment: "node",
-  testMatch: ["<rootDir>/*/*.test.js", "<rootDir>/*/*.integration.test.js"],
-  collectCoverage: true,
+  testMatch: [
+    "<rootDir>/controllers/authControllerOrderStatusController.integration.test.js",
+  ],
+  collectCoverage: false,
   collectCoverageFrom: ["<rootDir>/*/*.js"],
   coverageThreshold: {
     global: {

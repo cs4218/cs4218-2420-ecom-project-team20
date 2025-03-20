@@ -7,7 +7,8 @@ import JWT from "jsonwebtoken";
 
 export const registerController = async (req, res) => {
   try {
-    const { name, email, password, phone, address, answer } = req.body;
+    console.log(req.body);
+    const { name, email, password, phone, address, dob, answer } = req.body;
     // validations
     if (!name) {
       return res.send({ error: "Name is required" });
@@ -23,6 +24,9 @@ export const registerController = async (req, res) => {
     }
     if (!address) {
       return res.send({ message: "Address is required" });
+    }
+    if (!dob) {
+      return res.send({ message: "Date of Birth is required" });
     }
     if (!answer) {
       return res.send({ message: "Answer is required" });
@@ -89,13 +93,13 @@ export const loginController = async (req, res) => {
     }
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(200).send({
+      return res.status(401).send({
         success: false,
         message: "Invalid Password",
       });
     }
     // token
-    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     res.status(200).send({
@@ -161,7 +165,7 @@ export const forgotPasswordController = async (req, res) => {
 // test controller
 export const testController = (req, res) => {
   try {
-    res.send({success:true, message: "Protected Routes"});
+    res.send({ success: true, message: "Protected Routes" });
   } catch (error) {
     console.log(error);
     res.send({ error });
@@ -210,9 +214,11 @@ export const getOrdersController = async (req, res) => {
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name");
-    res.json({
+    console.log(orders);
+    res.status(200).json({
       success: true,
-      orders});
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -231,8 +237,10 @@ export const getAllOrdersController = async (req, res) => {
       .populate("products", "-photo")
       .populate("buyer", "name")
       .sort({ createdAt: -1 });
-    res.json({
-      success: true,orders});
+    res.status(200).json({
+      success: true,
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -253,8 +261,10 @@ export const orderStatusController = async (req, res) => {
       { status },
       { new: true }
     );
-    res.json({
-      success: true,updatedOrder});
+    res.status(200).json({
+      success: true,
+      updatedOrder,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
