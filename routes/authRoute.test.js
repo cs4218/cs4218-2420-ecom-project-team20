@@ -162,7 +162,7 @@ describe('Auth Routes Integration Tests', () => {
           password: 'wrongpassword'
         });
 
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(401);
       expect(response.body).toHaveProperty('success', false);
       expect(response.body.message).toMatch(/invalid password/i);
     });

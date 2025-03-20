@@ -3,7 +3,7 @@ export default {
 
   testEnvironment: "node",
   testMatch: [
-    "<rootDir>/controllers/authControllerOrderStatusController.integration.test.js",
+    "<rootDir>/*/*.test.js",
   ],
   collectCoverage: false,
   collectCoverageFrom: ["<rootDir>/*/*.js"],
