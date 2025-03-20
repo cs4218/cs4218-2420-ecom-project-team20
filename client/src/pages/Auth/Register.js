@@ -29,7 +29,10 @@ const Register = () => {
       });
       if (res && res.data.success) {
         toast.success("Register Successfully, please login");
-        navigate("/login");
+        setTimeout(() => {
+          toast.dismiss(); // Clear all existing toasts
+          navigate("/login");
+        }, 1000);
       } else {
         toast.error(res.data.message);
       }
