@@ -11,6 +11,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,12 +32,24 @@ jobs:
         with:
           node-version: "23"
 
-      - name: Install dependencies
+      - name: Install dependencies (server)
         run: npm install
 
       - name: Install client dependencies
         working-directory: ./client
         run: npm install
 
+      - name: Create .env.test file
+        run: |
+          echo "PORT=6060" >> .env.test
+          echo "DEV_MODE=testing" >> .env.test
+          echo "MONGO_URL=mongodb://localhost:27017/test-db" >> .env.test
+          echo "JWT_SECRET=test_jwt_secret" >> .env.test
+          echo "BRAINTREE_MERCHANT_ID=test_merchant_id" >> .env.test
+          echo "BRAINTREE_PUBLIC_KEY=test_public_key" >> .env.test
+          echo "BRAINTREE_PRIVATE_KEY=test_private_key" >> .env.test
+
       - name: Run Jest tests
         run: npm test
+        env:
+          NODE_ENV: testing
