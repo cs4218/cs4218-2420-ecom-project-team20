@@ -24,9 +24,12 @@ export const registerController = async (req, res) => {
     if (!address) {
       return res.send({ message: "Address is required" });
     }
+<<<<<<< HEAD
     if (!DOB) {
       return res.send({ message: "Date of Birth is required" });
     }
+=======
+>>>>>>> parent of 6f477a1 (test: add ui and integration test)
     if (!answer) {
       return res.send({ message: "Answer is required" });
     }
@@ -92,7 +95,7 @@ export const loginController = async (req, res) => {
     }
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(401).send({
+      return res.status(200).send({
         success: false,
         message: "Invalid Password",
       });
@@ -164,7 +167,7 @@ export const forgotPasswordController = async (req, res) => {
 // test controller
 export const testController = (req, res) => {
   try {
-    res.send({ success: true, message: "Protected Routes" });
+    res.send({success:true, message: "Protected Routes"});
   } catch (error) {
     console.log(error);
     res.send({ error });
@@ -213,11 +216,9 @@ export const getOrdersController = async (req, res) => {
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name");
-    console.log(orders);
-    res.status(200).json({
+    res.json({
       success: true,
-      orders,
-    });
+      orders});
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -237,9 +238,13 @@ export const getAllOrdersController = async (req, res) => {
       .populate("buyer", "name")
       .sort({ createdAt: -1 });
     res.json({
+<<<<<<< HEAD
       success: true,
       orders,
     });
+=======
+      success: true,orders});
+>>>>>>> parent of 6f477a1 (test: add ui and integration test)
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -261,9 +266,13 @@ export const orderStatusController = async (req, res) => {
       { new: true }
     );
     res.json({
+<<<<<<< HEAD
       success: true,
       updatedOrder,
     });
+=======
+      success: true,updatedOrder});
+>>>>>>> parent of 6f477a1 (test: add ui and integration test)
   } catch (error) {
     console.log(error);
     res.status(500).send({
