@@ -4,6 +4,7 @@ const mockingoose = require('mockingoose');
 
 describe('Category Model Tests', () => {
 
+
   it('should save a category successfully', async () => {
     const mockCategory = new Category({ name: 'Books', slug: 'books' });
 
