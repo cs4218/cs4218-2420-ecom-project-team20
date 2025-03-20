@@ -7,8 +7,7 @@ import JWT from "jsonwebtoken";
 
 export const registerController = async (req, res) => {
   try {
-    console.log(req.body);
-    const { name, email, password, phone, address, DOB, answer } = req.body;
+    const { name, email, password, phone, address, answer } = req.body;
     // validations
     if (!name) {
       return res.send({ error: "Name is required" });
@@ -99,7 +98,7 @@ export const loginController = async (req, res) => {
       });
     }
     // token
-    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     res.status(200).send({
@@ -236,7 +235,7 @@ export const getAllOrdersController = async (req, res) => {
       .populate("products", "-photo")
       .populate("buyer", "name")
       .sort({ createdAt: -1 });
-    res.status(200).json({
+    res.json({
       success: true,
       orders,
     });
@@ -260,7 +259,7 @@ export const orderStatusController = async (req, res) => {
       { status },
       { new: true }
     );
-    res.status(200).json({
+    res.json({
       success: true,
       updatedOrder,
     });
