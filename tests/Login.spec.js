@@ -29,8 +29,6 @@ test.beforeEach(async ({ page }) => {
   const savedUser = await UserModel.findOne({ email: testUserEmail });
   expect(savedUser).not.toBeNull(); // Ensure user exists
   expect(savedUser.email).toBe(testUserEmail);
-  console.log("User verified in MongoMemoryServer:", savedUser);
-  console.log("User created:", testUser._id);
   await page.goto("http://localhost:3000/login");
 });
 

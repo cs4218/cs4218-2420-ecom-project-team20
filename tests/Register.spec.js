@@ -33,6 +33,7 @@ test.describe("Register component", () => {
     await expect(
       page.getByRole("textbox", { name: "Enter Your Address" })
     ).toBeVisible();
+
     await expect(
       page.getByRole("textbox", { name: "What is Your Favorite sports" })
     ).toBeVisible();
@@ -60,8 +61,7 @@ test.describe("Register component", () => {
       .getByRole("textbox", { name: "What is Your Favorite sports" })
       .fill("Football");
 
-    const dateInput = page.locator("input[type='date']");
-    await dateInput.fill("1990-01-01");
+    await page.getByPlaceholder("Enter Your DOB").fill("2025-03-20");
 
     const registerButton = page.getByRole("button", { name: "REGISTER" });
 
