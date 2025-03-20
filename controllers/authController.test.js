@@ -105,7 +105,9 @@ describe("Register Controller Test", () => {
   test("should return error when phone is missing", async () => {
     req.body.phone = "";
     await registerController(req, res);
-    expect(res.send).toHaveBeenCalledWith({ message: "Phone number is required" });
+    expect(res.send).toHaveBeenCalledWith({
+      message: "Phone number is required",
+    });
   });
 
   test("should return error when address is missing", async () => {
@@ -208,7 +210,7 @@ describe("Login Controller Test", () => {
     });
   });
 
-  test("should return 200 with invalid password message if password does not match", async () => {
+  test("should return 401 with invalid password message if password does not match", async () => {
     const mockUser = {
       _id: "user123",
       name: "John Doe",
@@ -225,7 +227,7 @@ describe("Login Controller Test", () => {
       req.body.password,
       mockUser.password
     );
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledWith(401);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Invalid Password",
@@ -380,7 +382,7 @@ describe("Test Controller", () => {
 
   test("should send Protected Routes", () => {
     testController(req, res);
-    expect(res.send).toHaveBeenCalledWith("Protected Routes");
+    expect(res.send).toHaveBeenCalledWith({message: "Protected Routes", success: true});
   });
 });
 
@@ -439,6 +441,7 @@ describe("Update Profile Controller", () => {
         password: "hashedPassword123",
         phone: req.body.phone,
         address: req.body.address,
+        email: req.body.email,
       },
       { new: true }
     );
@@ -463,6 +466,7 @@ describe("Update Profile Controller", () => {
       req.user._id,
       {
         name: req.body.name,
+        email: req.body.email,
         password: mockUser.password,
         phone: req.body.phone,
         address: req.body.address,
@@ -502,7 +506,7 @@ describe("Get Orders Controller", () => {
     orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
     await getOrdersController(req, res);
     expect(orderModel.find).toHaveBeenCalledWith({ buyer: req.user._id });
-    expect(res.json).toHaveBeenCalledWith(ordersArray);
+    expect(res.json).toHaveBeenCalledWith({orders: ordersArray, success: true});
   });
 
   test("should handle error while getting orders", async () => {
@@ -541,7 +545,7 @@ describe("Get All Orders Controller", () => {
     orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
     await getAllOrdersController(req, res);
     expect(orderModel.find).toHaveBeenCalledWith({});
-    expect(res.json).toHaveBeenCalledWith(ordersArray);
+    expect(res.json).toHaveBeenCalledWith({success: true, orders: ordersArray});
   });
 
   test("should handle error while getting all orders", async () => {
@@ -583,7 +587,7 @@ describe("Order Status Controller", () => {
       { status: req.body.status },
       { new: true }
     );
-    expect(res.json).toHaveBeenCalledWith(updatedOrder);
+    expect(res.json).toHaveBeenCalledWith({success: true,updatedOrder});
   });
 
   test("should handle error while updating order status", async () => {

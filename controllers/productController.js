@@ -78,8 +78,8 @@ export const getProductController = async (req, res) => {
       .sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
-      counTotal: products.length,
-      message: "ALlProducts ",
+      total: products.length,
+      message: "All Products",
       products,
     });
   } catch (error) {
@@ -141,7 +141,7 @@ export const productPhotoController = async (req, res) => {
 //delete controller
 export const deleteProductController = async (req, res) => {
   try {
-    const existingProduct = await productModel.findById(req.params.id);
+    const existingProduct = await productModel.findById(req.params.pid);
     if (!existingProduct) {
       return res.status(404).send({
         success: false,
@@ -295,7 +295,7 @@ export const searchProductController = async (req, res) => {
         ],
       })
       .select("-photo");
-    res.json(results);
+    res.json({success: true, results});
   } catch (error) {
     console.log(error);
     res.status(400).send({
@@ -358,14 +358,14 @@ export const braintreeTokenController = async (req, res) => {
   try {
     gateway.clientToken.generate({}, function (err, response) {
       if (err) {
-        res.status(500).send(err);
+        res.status(500).send({success: false, err});
       } else {
-        res.send(response);
+        res.send({success: true, clientToken: response.clientToken});
       }
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
@@ -392,7 +392,7 @@ export const brainTreePaymentController = async (req, res) => {
             payment: result,
             buyer: req.user._id,
           }).save();
-          res.json({ ok: true });
+          res.json({ success: true });
         } else {
           res.status(500).send(error);
         }

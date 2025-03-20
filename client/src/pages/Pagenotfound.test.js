@@ -62,6 +62,6 @@ describe("Pagenotfound page", () => {
 
         const link = screen.getByRole("link", { name: /go back/i });
         expect(link).toBeInTheDocument();
-        expect(link).toHaveAttribute("href", "/");
+        expect(link).toHaveAttribute("href", "/login");
     })
 });
