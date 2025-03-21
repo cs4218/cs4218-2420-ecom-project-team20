@@ -161,7 +161,7 @@ export const forgotPasswordController = async (req, res) => {
 // test controller
 export const testController = (req, res) => {
   try {
-    res.send({success:true, message: "Protected Routes"});
+    res.send({ success: true, message: "Protected Routes" });
   } catch (error) {
     console.log(error);
     res.send({ error });
@@ -210,9 +210,10 @@ export const getOrdersController = async (req, res) => {
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name");
-    res.json({
+    res.status(200).json({
       success: true,
-      orders});
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -231,8 +232,10 @@ export const getAllOrdersController = async (req, res) => {
       .populate("products", "-photo")
       .populate("buyer", "name")
       .sort({ createdAt: -1 });
-    res.json({
-      success: true,orders});
+    res.status(200).json({
+      success: true,
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -253,8 +256,10 @@ export const orderStatusController = async (req, res) => {
       { status },
       { new: true }
     );
-    res.json({
-      success: true,updatedOrder});
+    res.status(200).json({
+      success: true,
+      updatedOrder,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
