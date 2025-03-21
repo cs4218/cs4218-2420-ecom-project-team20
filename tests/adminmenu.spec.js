@@ -7,7 +7,6 @@ dotenv.config();
 
 test.beforeEach(async ({ page }) => {
   await mongoose.connect(process.env.MONGO_URL);
-  await mongoose.connection.collection("users").deleteMany({});
 
   // Create admin user
   const hashedPassword = await hashPassword("admin@test.com");
