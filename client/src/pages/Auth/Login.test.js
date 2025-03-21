@@ -111,7 +111,7 @@ describe("Login Component", () => {
         success: true,
         user: { id: 1, name: "John Doe", email: "test@example.com" },
         token: "mockToken",
-        message: "Login successful",
+        message: "Logged in successfully",
       },
     });
 
@@ -132,8 +132,8 @@ describe("Login Component", () => {
     fireEvent.click(getByText("LOGIN"));
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith("Login successful", {
-      duration: 5000,
+    expect(toast.success).toHaveBeenCalledWith("Logged in successfully", {
+      duration: 500,
       icon: "🙏",
       style: {
         background: "green",

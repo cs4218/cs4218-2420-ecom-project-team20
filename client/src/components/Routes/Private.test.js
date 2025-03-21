@@ -6,6 +6,7 @@ import "@testing-library/jest-dom";
 import React from "react";
 import axios from "axios";
 import { beforeEach } from "node:test";
+import { useNavigate } from "react-router-dom";
 
 jest.mock("axios");
 jest.mock("../../context/auth", () => ({
@@ -22,13 +23,25 @@ describe("PrivateRoute", () => {
 
     axios.get.mockResolvedValue({ data: { ok: false } });
 
-    const { getByRole } = render(
-      <MemoryRouter>
-        <PrivateRoute />
+    render(
+      <MemoryRouter initialEntries={["/protected"]}>
+        <Routes>
+          <Route
+            path="/protected"
+            element={
+              <PrivateRoute>
+                <div>Protected</div>
+              </PrivateRoute>
+            }
+          />
+          <Route path="/login" element={<div>Login Page</div>} />
+        </Routes>
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(getByRole("status")).toBeInTheDocument());
+    await waitFor(() => {
+      expect(screen.getByText("Login Page")).toBeInTheDocument();
+    });
   });
 
   it("should render <Spinner /> if the token is invalid", async () => {

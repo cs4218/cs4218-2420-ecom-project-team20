@@ -1,19 +1,30 @@
 import { test, expect } from "@playwright/test";
 import mongoose from "mongoose";
-import UserModel from "../models/userModel";
+import { hashPassword } from "../helpers/authHelper.js";
 import dotenv from "dotenv";
-import bcrypt from "bcrypt";
+import UserModel from "../models/userModel.js";
+
 
 let testUserEmail;
 let testUserPassword;
 let hashedPassword;
 
+async function deleteUser(email) {
+  try {
+    await UserModel.deleteOne({ email });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await mongoose.connect(process.env.MONGO_URL);
-  await mongoose.connection.collection("users").deleteMany({});
+
   testUserEmail = "johndoe@test.com";
+  await deleteUser(testUserEmail);
+
   testUserPassword = "johndoe@test.com";
-  hashedPassword = await bcrypt.hash(testUserPassword, 10);
+  hashedPassword = await hashPassword("johndoe@test.com");
   const testUser = new UserModel({
     name: "John Doe",
     email: testUserEmail,
@@ -22,19 +33,19 @@ test.beforeEach(async ({ page }) => {
     phone: "1234567890",
     address: "123 Street",
     answer: "Football",
-    role: 1,
+    role: 0,
   });
   await testUser.save();
+
   const savedUser = await UserModel.findOne({ email: testUserEmail });
-  expect(savedUser).not.toBeNull(); // Ensure user exists
+  expect(savedUser).not.toBeNull();
   expect(savedUser.email).toBe(testUserEmail);
-  console.log("User verified in MongoMemoryServer:", savedUser);
-  console.log("User created:", testUser._id);
+
   await page.goto("http://localhost:3000/login");
 });
 
 test.afterEach(async () => {
-  await mongoose.connection.collection("users").deleteMany({});
+  await deleteUser(testUserEmail);
   await mongoose.disconnect();
 });
 

@@ -50,23 +50,26 @@ describe("AdminOrders Component", () => {
 
   it("renders the component correctly", async () => {
     axios.get.mockResolvedValueOnce({
-      data: [
-        {
-          _id: "order123",
-          status: "Not Process",
-          buyer: { name: "John Doe" },
-          createAt: new Date(),
-          payment: { success: true },
-          products: [
-            {
-              _id: "product123",
-              name: "Product 1",
-              description: "Product description",
-              price: 50,
-            },
-          ],
-        },
-      ],
+      data: {
+        success: "true",
+        orders: [
+          {
+            _id: "order123",
+            status: "Not Process",
+            buyer: { name: "John Doe" },
+            createAt: new Date(),
+            payment: { success: true },
+            products: [
+              {
+                _id: "product123",
+                name: "Product 1",
+                description: "Product description",
+                price: 50,
+              },
+            ],
+          },
+        ],
+      },
     });
 
     const { getByText } = render(
@@ -96,23 +99,26 @@ describe("AdminOrders Component", () => {
 
   it("updates order status when a new status is selected", async () => {
     axios.get.mockResolvedValueOnce({
-      data: [
-        {
-          _id: "order123",
-          status: "Not Process",
-          buyer: { name: "John Doe" },
-          createAt: new Date(),
-          payment: { success: true },
-          products: [
-            {
-              _id: "product123",
-              name: "Product 1",
-              description: "Product description",
-              price: 50,
-            },
-          ],
-        },
-      ],
+      data: {
+        success: "true",
+        orders: [
+          {
+            _id: "order123",
+            status: "Not Process",
+            buyer: { name: "John Doe" },
+            createAt: new Date(),
+            payment: { success: true },
+            products: [
+              {
+                _id: "product123",
+                name: "Product 1",
+                description: "Product description",
+                price: 50,
+              },
+            ],
+          },
+        ],
+      },
     });
 
     axios.put.mockResolvedValueOnce({
@@ -144,23 +150,26 @@ describe("AdminOrders Component", () => {
 
   it("displays error toast if updating status fails", async () => {
     axios.get.mockResolvedValueOnce({
-      data: [
-        {
-          _id: "order123",
-          status: "Not Process",
-          buyer: { name: "John Doe" },
-          createAt: new Date(),
-          payment: { success: true },
-          products: [
-            {
-              _id: "product123",
-              name: "Product 1",
-              description: "Product description",
-              price: 50,
-            },
-          ],
-        },
-      ],
+      data: {
+        success: "true",
+        orders: [
+          {
+            _id: "order123",
+            status: "Not Process",
+            buyer: { name: "John Doe" },
+            createAt: new Date(),
+            payment: { success: true },
+            products: [
+              {
+                _id: "product123",
+                name: "Product 1",
+                description: "Product description",
+                price: 50,
+              },
+            ],
+          },
+        ],
+      },
     });
 
     axios.put.mockRejectedValueOnce(new Error("Failed to update"));
@@ -190,7 +199,7 @@ describe("AdminOrders Component", () => {
 
   it("displays 'No orders found' if no orders are returned from the API", async () => {
     axios.get.mockResolvedValueOnce({
-      data: [],
+      data: [{ success: true, orders: [] }],
     });
 
     const { getByText } = render(
@@ -205,38 +214,41 @@ describe("AdminOrders Component", () => {
 
   it("renders multiple orders correctly", async () => {
     axios.get.mockResolvedValueOnce({
-      data: [
-        {
-          _id: "order123",
-          status: "Not Process",
-          buyer: { name: "John Doe" },
-          createAt: new Date(),
-          payment: { success: true },
-          products: [
-            {
-              _id: "product123",
-              name: "Product 1",
-              description: "Product description",
-              price: 50,
-            },
-          ],
-        },
-        {
-          _id: "order124",
-          status: "Processing",
-          buyer: { name: "Jane Doe" },
-          createAt: new Date(),
-          payment: { success: true },
-          products: [
-            {
-              _id: "product124",
-              name: "Product 2",
-              description: "Product description 2",
-              price: 100,
-            },
-          ],
-        },
-      ],
+      data: {
+        success: "true",
+        orders: [
+          {
+            _id: "order123",
+            status: "Not Process",
+            buyer: { name: "John Doe" },
+            createAt: new Date(),
+            payment: { success: true },
+            products: [
+              {
+                _id: "product123",
+                name: "Product 1",
+                description: "Product description",
+                price: 50,
+              },
+            ],
+          },
+          {
+            _id: "order124",
+            status: "Processing",
+            buyer: { name: "Jane Doe" },
+            createAt: new Date(),
+            payment: { success: true },
+            products: [
+              {
+                _id: "product124",
+                name: "Product 2",
+                description: "Product description 2",
+                price: 100,
+              },
+            ],
+          },
+        ],
+      },
     });
 
     const { getByText } = render(

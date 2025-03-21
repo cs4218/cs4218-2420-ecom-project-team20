@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/auth";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import axios from "axios";
 import Spinner from "../Spinner";
 import React from "react";
@@ -44,5 +44,9 @@ export default function PrivateRoute() {
     return <div>Error: {error}</div>; // Show error message if there is a network error
   }
 
-  return ok ? <Outlet data-testid="outlet" /> : <Spinner path="" />;
+  return ok ? (
+    <Outlet data-testid="outlet" />
+  ) : (
+    <Navigate to="/login" replace />
+  );
 }
