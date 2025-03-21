@@ -11,7 +11,7 @@ const Orders = () => {
   const getOrders = async () => {
     try {
       const { data } = await axios.get("/api/v1/auth/orders");
-      setOrders(data);
+      setOrders(data.orders);
     } catch (error) {
       console.log(error);
     }
@@ -50,7 +50,9 @@ const Orders = () => {
                         <td>{o?.status}</td>
                         <td>{o?.buyer?.name}</td>
                         <td>{moment(o?.createAt).fromNow()}</td>
-                        <td data-testid="payment-status">{o?.payment.success ? "Success" : "Failed"}</td>
+                        <td data-testid="payment-status">
+                          {o?.payment.success ? "Success" : "Failed"}
+                        </td>
                         <td data-testid="quantity">{o?.products?.length}</td>
                       </tr>
                     </tbody>
