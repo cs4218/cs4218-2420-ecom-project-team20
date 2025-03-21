@@ -316,8 +316,8 @@ describe("Product Controller CRUD Test", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith({
         success: true,
-        counTotal: mockProductsList.length,
-        message: "ALlProducts ",
+        total: mockProductsList.length,
+        message: "All Products",
         products: mockProductsList,
       });
     });
@@ -495,7 +495,7 @@ describe("Product Controller CRUD Test", () => {
 
     it("should return error if product does not exist", async () => {
       req.params = {
-        id: "mock-nonexistent-pid"
+        pid: "mock-nonexistent-pid"
       };
 
       productModel.findById = jest.fn().mockResolvedValue(null);
@@ -930,7 +930,7 @@ describe("Product Controller Advanced Functions Test", () => {
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(mockProductsList);
+      expect(res.json).toHaveBeenCalledWith({success: true, results:mockProductsList});
     });
 
     it("should handle errors", async () => {
@@ -1088,7 +1088,7 @@ describe("Product Controller Advanced Functions Test", () => {
         await braintreeTokenController(req, res);
 
         expect(gateway.clientToken.generate).toHaveBeenCalled();
-        expect(res.send).toHaveBeenCalledWith({ clientToken: mockToken });
+        expect(res.send).toHaveBeenCalledWith({ success: true, clientToken: mockToken });
       });
 
       it("should handle errors when generating a Braintree client token", async () => {
@@ -1101,7 +1101,7 @@ describe("Product Controller Advanced Functions Test", () => {
 
         expect(gateway.clientToken.generate).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.send).toHaveBeenCalledWith(mockError);
+        expect(res.send).toHaveBeenCalledWith({success: false, err: mockError});
       });
 
       it("should handle errors internal server error", async () => {
@@ -1116,6 +1116,7 @@ describe("Product Controller Advanced Functions Test", () => {
         expect(gateway.clientToken.generate).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({
+          success: false,
           error: "Internal Server Error",
         });
       });
@@ -1138,7 +1139,7 @@ describe("Product Controller Advanced Functions Test", () => {
           payment: mockResult,
           buyer: req.user._id,
         });
-        expect(res.json).toHaveBeenCalledWith({ ok: true });
+        expect(res.json).toHaveBeenCalledWith({ success: true });
       });
 
       it("should handle payment-related errors", async () => {

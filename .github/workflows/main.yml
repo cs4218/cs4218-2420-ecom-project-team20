@@ -11,6 +11,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,7 +32,7 @@ jobs:
         with:
           node-version: "23"
 
-      - name: Install dependencies
+      - name: Install dependencies (server)
         run: npm install
 
       - name: Install client dependencies
@@ -29,3 +41,5 @@ jobs:
 
       - name: Run Jest tests
         run: npm test
+        env:
+          NODE_ENV: testing
