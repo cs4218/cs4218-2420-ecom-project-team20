@@ -19,7 +19,9 @@ async function deleteUser(email) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await mongoose.connect(process.env.MONGO_URL);
+  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+  
+  await mongoose.connect(uri);
   await deleteUser(adminEmail);
 
   // Create admin user

@@ -5,3 +5,4 @@ node_modules
 /coverage/
 /playwright/.cache/
 .env
+.mongo-uri
