@@ -210,7 +210,7 @@ export const getOrdersController = async (req, res) => {
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name");
-    res.json({
+    res.status(200).json({
       success: true,
       orders});
   } catch (error) {
