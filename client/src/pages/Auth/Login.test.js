@@ -133,7 +133,7 @@ describe("Login Component", () => {
 
     await waitFor(() => expect(axios.post).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledWith("Logged in successfully", {
-      duration: 5000,
+      duration: 500,
       icon: "🙏",
       style: {
         background: "green",
