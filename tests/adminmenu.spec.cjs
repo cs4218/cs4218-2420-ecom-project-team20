@@ -5,39 +5,62 @@ import { hashPassword } from "../helpers/authHelper";
 import UserModel from "../models/userModel";
 dotenv.config();
 
+let adminName;
+let adminEmail;
+let adminPassword;
+
+async function deleteUser(email) {
+  try {
+    await UserModel.deleteOne({ email });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await mongoose.connect(process.env.MONGO_URL);
+  await deleteUser(adminEmail);
 
   // Create admin user
-  const hashedPassword = await hashPassword("admin@test.com");
+  adminName = "admin";
+  adminEmail = "admin@test.com";
+  adminPassword = "admin@test.com";
+  const hashedPassword = await hashPassword(adminPassword);
   const adminUser = new UserModel({
-    name: "Admin",
-    email: "admin@test.com",
+    name: adminName,
+    email: adminEmail,
     password: hashedPassword,
     dob: "1990-01-01",
     phone: "1234567890",
     address: "123 Street",
     answer: "Football",
-    role: 0,
+    role: 1,
   });
   await adminUser.save();
-
-  await page.goto("http://localhost:3000/login");
-
-  await page.getByPlaceholder("Enter Your Email").fill("admin@test.com");
-  await page.getByPlaceholder("Enter Your Password").fill("admin@test.com");
-  await page.getByRole("button", { name: "LOGIN" }).click();
-
-  await page.goto("http://localhost:3000/dashboard/admin");
 });
 
 test.afterEach(async () => {
-  await mongoose.connection.collection("users").deleteMany({});
+  await deleteUser(adminEmail);
   await mongoose.disconnect();
 });
 
 test.describe("AdminMenu component", () => {
-  test("should load AdminMenu component", async ({ page }) => {
+  test("should load AdminMenu component after logging in as admin", async ({
+    page,
+  }) => {
+    // login as admin
+    await page.goto("http://localhost:3000/login");
+    await page
+      .getByRole("textbox", { name: "Enter Your Email" })
+      .fill(adminEmail);
+    await page
+      .getByRole("textbox", { name: "Enter Your Password" })
+      .fill(adminPassword);
+    await page.getByRole("button", { name: "LOGIN" }).click();
+
+    // navigate to admin dashboard
+    await page.getByRole("button", { name: adminName }).click();
+    await page.getByRole("link", { name: "Dashboard" }).click();
     await expect(page).toHaveURL("http://localhost:3000/dashboard/admin");
 
     await expect(page.getByText("Admin Panel")).toBeVisible();
