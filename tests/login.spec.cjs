@@ -10,10 +10,20 @@ let testUserEmail;
 let testUserPassword;
 let hashedPassword;
 
+async function deleteUser(email) {
+  try {
+    await UserModel.deleteOne({ email });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await mongoose.connect(process.env.MONGO_URL);
-  await mongoose.connection.collection("users").deleteMany({});
+
   testUserEmail = "johndoe@test.com";
+  await deleteUser(testUserEmail);
+
   testUserPassword = "johndoe@test.com";
   hashedPassword = await hashPassword("johndoe@test.com");
   const testUser = new UserModel({
@@ -24,17 +34,19 @@ test.beforeEach(async ({ page }) => {
     phone: "1234567890",
     address: "123 Street",
     answer: "Football",
-    role: 1,
+    role: 0,
   });
   await testUser.save();
+
   const savedUser = await UserModel.findOne({ email: testUserEmail });
-  expect(savedUser).not.toBeNull(); // Ensure user exists
+  expect(savedUser).not.toBeNull();
   expect(savedUser.email).toBe(testUserEmail);
+
   await page.goto("http://localhost:3000/login");
 });
 
 test.afterEach(async () => {
-  await mongoose.connection.collection("users").deleteMany({});
+  await deleteUser(testUserEmail);
   await mongoose.disconnect();
 });
 
