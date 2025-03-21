@@ -1,6 +1,7 @@
 import { spawn, execSync } from 'child_process';
 import { startMongoMemoryServer, stopMongoMemoryServer } from '../utils/mongo-memory-server.js';
 import fs from 'fs/promises';
+import waitOn from 'wait-on';
 
 let devProcess;
 let mongoRunning = false;
@@ -61,7 +62,13 @@ async function run() {
     });
 
     console.log('⌛ Waiting for app to be ready...');
-    await wait(5000); // Replace with polling if needed
+    await waitOn({
+      resources: ['http://localhost:3000'],
+      timeout: 30000,
+      interval: 500,
+      validateStatus: status => status === 200,
+    });
+    console.log('✅ Client is ready');
 
     console.log('🚀 Running Playwright tests...');
     const testProcess = spawn('npx', ['playwright', 'test'], {

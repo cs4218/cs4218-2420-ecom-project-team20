@@ -52,7 +52,8 @@
     "mockingoose": "^2.16.2",
     "mongodb-memory-server": "^10.1.4",
     "sonarqube-scanner": "^3.3.0",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "wait-on": "^8.0.3"
   },
   "jest": {
     "testEnvironment": "jest-environment-jsdom",
