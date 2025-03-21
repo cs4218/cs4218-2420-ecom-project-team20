@@ -24,7 +24,7 @@ const Login = () => {
       });
       if (res && res.data.success) {
         toast.success(res.data && res.data.message, {
-          duration: 5000,
+          duration: 500,
           icon: "🙏",
           style: {
             background: "green",
