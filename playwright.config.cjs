@@ -11,8 +11,9 @@ const { defineConfig, devices } = require("@playwright/test");
  * @see https://playwright.dev/docs/test-configuration
  */
 module.exports = defineConfig({
+  globalSetup: require.resolve('./global-playwright-setup.js'),
   testDir: "./tests",
-  testMatch: "Login.spec.js",
+  testMatch: "PriceFilter.spec.js",
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

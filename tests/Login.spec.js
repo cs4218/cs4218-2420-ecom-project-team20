@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import UserModel from "../models/userModel";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
-dotenv.config();
 
 let testUserEmail;
 let testUserPassword;
