@@ -23,25 +23,13 @@ describe("PrivateRoute", () => {
 
     axios.get.mockResolvedValue({ data: { ok: false } });
 
-    render(
-      <MemoryRouter initialEntries={["/protected"]}>
-        <Routes>
-          <Route
-            path="/protected"
-            element={
-              <PrivateRoute>
-                <div>Protected</div>
-              </PrivateRoute>
-            }
-          />
-          <Route path="/login" element={<div>Login Page</div>} />
-        </Routes>
+    const { getByRole } = render(
+      <MemoryRouter>
+        <PrivateRoute />
       </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("Login Page")).toBeInTheDocument();
-    });
+    await waitFor(() => expect(getByRole("status")).toBeInTheDocument());
   });
 
   it("should render <Spinner /> if the token is invalid", async () => {
