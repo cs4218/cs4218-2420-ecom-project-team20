@@ -44,9 +44,5 @@ export default function PrivateRoute() {
     return <div>Error: {error}</div>; // Show error message if there is a network error
   }
 
-  return ok ? (
-    <Outlet data-testid="outlet" />
-  ) : (
-    <Navigate to="/login" replace />
-  );
+  return ok ? <Outlet data-testid="outlet" /> : <Spinner path="" />;
 }

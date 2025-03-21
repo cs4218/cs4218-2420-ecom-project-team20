@@ -45,16 +45,44 @@ const Header = () => {
             <span className="navbar-toggler-icon" />
           </button>
           <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
-            {!auth?.user ? (
-              <span className="navbar-brand">🛒 Virtual Vault</span>
-            ) : (
-              <Link to="/" className="navbar-brand">
-                🛒 Virtual Vault
-              </Link>
-            )}
+            <Link to="/" className="navbar-brand">
+              🛒 Virtual Vault
+            </Link>
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
               {!auth?.user ? (
                 <>
+                  <SearchInput />
+                  <li className="nav-item">
+                    <NavLink to="/" className="nav-link ">
+                      Home
+                    </NavLink>
+                  </li>
+                  <li className="nav-item dropdown">
+                    <Link
+                      className="nav-link dropdown-toggle"
+                      to={"/categories"}
+                      data-bs-toggle="dropdown"
+                    >
+                      Categories
+                    </Link>
+                    <ul className="dropdown-menu">
+                      <li>
+                        <Link className="dropdown-item" to={"/categories"}>
+                          All Categories
+                        </Link>
+                      </li>
+                      {categories?.map((c) => (
+                        <li key={c.slug}>
+                          <Link
+                            className="dropdown-item"
+                            to={`/category/${c.slug}`}
+                          >
+                            {c.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
                   <li className="nav-item">
                     <NavLink to="/register" className="nav-link">
                       Register
