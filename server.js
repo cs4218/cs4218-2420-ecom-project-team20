@@ -8,7 +8,10 @@ import productRoutes from "./routes/productRoutes.js";
 import cors from "cors";
 
 // configure env
-dotenv.config();
+dotenv.config({
+    path: process.env.NODE_ENV === 'testing' ? '.env.test' : '.env'
+}
+);
 
 //database config
 connectDB();

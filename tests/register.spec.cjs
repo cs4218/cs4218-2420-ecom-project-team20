@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { hashPassword } from "../helpers/authHelper";
 import UserModel from "../models/userModel";
-dotenv.config();
 
 let testUserEmail;
 let hashedPassword;

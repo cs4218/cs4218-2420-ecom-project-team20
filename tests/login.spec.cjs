@@ -4,7 +4,6 @@ import { hashPassword } from "../helpers/authHelper.js";
 import dotenv from "dotenv";
 import UserModel from "../models/userModel.js";
 
-dotenv.config();
 
 let testUserEmail;
 let testUserPassword;
