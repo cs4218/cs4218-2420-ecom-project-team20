@@ -8,7 +8,9 @@
     "server": "nodemon server.js",
     "client": "npm start --prefix ./client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev:test": "concurrently \"npm run start\" \"npm run client\"",
     "sonarqube": "sonarqube-scanner",
+    "test:ui": "node scripts/run-ui-tests.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --silent",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js --detectOpenHandles --silent"
@@ -50,7 +52,8 @@
     "mockingoose": "^2.16.2",
     "mongodb-memory-server": "^10.1.4",
     "sonarqube-scanner": "^3.3.0",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "wait-on": "^8.0.3"
   },
   "jest": {
     "testEnvironment": "jest-environment-jsdom",

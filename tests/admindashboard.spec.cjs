@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import mongoose from "mongoose";
+import fs from 'fs/promises';
 import dotenv from "dotenv";
 import { hashPassword } from "../helpers/authHelper";
 import UserModel from "../models/userModel";
@@ -19,7 +20,9 @@ async function deleteUser(email) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await mongoose.connect(process.env.MONGO_URL);
+  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+  
+  await mongoose.connect(uri);
   await deleteUser(adminEmail);
 
   // Create admin user

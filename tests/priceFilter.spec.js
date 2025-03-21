@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 import mongoose from "mongoose";
+import fs from 'fs/promises';
 import productModel from '../models/productModel.js';
 
 test.beforeAll(async () => {
-    await mongoose.connect(process.env.MONGO_URL);
+    const uri = await fs.readFile('.mongo-uri', 'utf-8');
+    await mongoose.connect(uri);
     
     const journal = new productModel({
         name: 'premium-journal',

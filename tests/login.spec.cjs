@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import mongoose from "mongoose";
+import fs from 'fs/promises';
 import { hashPassword } from "../helpers/authHelper.js";
-import dotenv from "dotenv";
 import UserModel from "../models/userModel.js";
 
 
@@ -18,7 +18,8 @@ async function deleteUser(email) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await mongoose.connect(process.env.MONGO_URL);
+  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+  await mongoose.connect(uri);
 
   testUserEmail = "johndoe@test.com";
   await deleteUser(testUserEmail);
