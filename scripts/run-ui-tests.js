@@ -8,7 +8,6 @@ let mongoRunning = false;
 
 const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 const PORT = 6060;
-// const FORCE = process.argv.includes('--force');
 
 async function cleanup(exitCode = 0) {
   console.log('🧹 Cleaning up...');
@@ -17,14 +16,11 @@ async function cleanup(exitCode = 0) {
     console.log(`✋ Stopping dev process (PID: ${devProcess.pid})...`);
     try {
       if (process.platform === 'win32') {
-        // 🪟 Windows: kill tree using taskkill
         execSync(`taskkill /pid ${devProcess.pid} /T /F`);
       } else {
-        // 🐧 Unix/macOS: kill entire group
         process.kill(-devProcess.pid, 'SIGTERM');
       }
 
-      // Wait a bit to let it shut down gracefully
       await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (err) {
       console.error('⚠️ Error stopping dev process:', err.message);
@@ -53,10 +49,9 @@ async function run() {
     mongoRunning = true;
     await fs.writeFile('.mongo-uri', mongoUri, 'utf-8');
 
-    // 🚀 Start dev server (detached process group)
     devProcess = spawn('npm', ['run', 'dev:test'], {
       env: { ...process.env, MONGO_URL: mongoUri },
-      detached: true, // 💥 create a new process group
+      detached: true,
       stdio: 'inherit',
       shell: true,
     });
@@ -88,7 +83,7 @@ async function run() {
   }
 }
 
-// 🔌 Signal handlers
+
 const handleSignal = (signal) => {
   console.log(`\n${signal} received`);
   cleanup(1).catch(() => process.exit(1));
@@ -97,7 +92,7 @@ const handleSignal = (signal) => {
 process.on('SIGINT', () => handleSignal('SIGINT'));
 process.on('SIGTERM', () => handleSignal('SIGTERM'));
 
-// 🚨 Error handlers
+
 process.on('uncaughtException', (err) => {
   console.error('💥 Uncaught Exception:', err);
   cleanup(1).catch(() => process.exit(1));
