@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import mongoose from "mongoose";
+import fs from 'fs/promises';
 import { hashPassword } from "../helpers/authHelper.js";
-import dotenv from "dotenv";
 import UserModel from "../models/userModel.js";
 
 

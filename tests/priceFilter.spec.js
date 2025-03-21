@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import mongoose from "mongoose";
+import fs from 'fs/promises';
 import productModel from '../models/productModel.js';
 
 test.beforeAll(async () => {
