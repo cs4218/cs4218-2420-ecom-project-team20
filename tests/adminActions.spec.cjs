@@ -1,61 +1,135 @@
 // @ts-check
 import { test, expect } from "@playwright/test";
+import fs from "fs/promises";
+import mongoose from "mongoose";
+import categoryModel from "../models/categoryModel.js";
+import productModel from "../models/productModel.js";
+import userModel from "../models/userModel";
+import { hashPassword } from "../helpers/authHelper";
 
-const adminUser = {
-  name: "admin@test.sg",
-  email: "admin@test.sg",
-  password: "admin@test.sg",
-  phone: "admin@test.sg",
-  address: "admin@test.sg",
-};
+let adminName;
+let adminEmail;
+let adminPassword;
+let adminPhone;
+let adminUser;
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000");
+test.beforeAll(async () => {
+  const uri = await fs.readFile(".mongo-uri", "utf-8");
+
+  await mongoose.connect(uri);
+
+  // Create Admin User
+  adminName = "JRM-NUS";
+  adminEmail = "JRAdmin@test.sg";
+  adminPassword = "JRAdmin@test.sg";
+  adminPhone = "12345678";
+  const hashedPassword = await hashPassword(adminPassword);
+  adminUser = {
+    name: adminName,
+    email: adminEmail,
+    password: hashedPassword,
+    phone: adminPhone,
+    address: adminEmail,
+    answer: adminEmail,
+    role: 1,
+  };
+
+  const newAdminUser = new userModel(adminUser);
+  await newAdminUser.save();
 });
 
-test.describe("Create new category", () => {
-  test("should be able to login to admin account", async ({ page }) => {
-    await login(page, adminUser);
+test.afterAll(async () => {
+  await userModel.deleteMany({ email: adminEmail });
+  await mongoose.disconnect();
+});
+
+test("Create category UI test", async ({ page }) => {
+  await page.goto("http://localhost:3000");
+  await login(page, adminUser);
+
+  // Ensure correct user is logged in
+  const userTab = page.getByRole("button", { name: adminName });
+  await expect(userTab).toBeVisible();
+
+  await userTab.click();
+
+  const dashboardTab = page.getByRole("link", { name: "DASHBOARD" });
+  await dashboardTab.click();
+
+  const createCategoryTab = page.getByRole("link", { name: "Create Category" });
+  await createCategoryTab.click();
+
+  // Ensure category is not created yet
+  await expect(page.getByText(`Test Category`)).not.toBeVisible();
+
+  const categoryTextbox = page.getByRole("textbox", {
+    name: "Enter New Category",
   });
+  const submitButton = page.getByRole("button", { name: "Submit" });
 
-  test("should be able to go to Create Categories page", async ({ page }) => {
-    await login(page, adminUser);
-    await navigateToCreateCategoriesPage(page, adminUser);
+  await categoryTextbox.click();
+  await categoryTextbox.fill("Test Category");
+  await submitButton.click();
+
+  // Check if category is successfully created
+  await expect(page.getByText("Test Category is created")).toBeVisible();
+  await expect(page.locator('td').filter({ hasText: /^Test Category$/ })).toBeVisible();
+
+  // Check if category is successfully deleted
+  const deleteButton = page.getByRole("button", { name: "Delete" });
+  await deleteButton.click();
+  await expect(page.getByText("category is deleted")).toBeVisible();
+  await expect(page.locator('td').filter({ hasText: /^Test Category$/ })).not.toBeVisible();
+});
+
+test("Create Product UI test", async ({ page }) => {
+  await page.goto("http://localhost:3000");
+  await login(page, adminUser);
+
+  // Ensure correct user is logged in
+  const userTab = page.getByRole("button", { name: adminName });
+  await expect(userTab).toBeVisible();
+
+  await userTab.click();
+
+  const dashboardTab = page.getByRole("link", { name: "DASHBOARD" });
+  await dashboardTab.click();
+
+  // GO to Create Category tab
+  const createCategoryTab = page.getByRole("link", { name: "Create Category" });
+  await createCategoryTab.click();
+
+  // Ensure category is not created yet
+  await expect(page.getByText(`Test Category`)).not.toBeVisible();
+
+  const categoryTextbox = page.getByRole("textbox", {
+    name: "Enter New Category",
   });
+  const submitButton = page.getByRole("button", { name: "Submit" });
 
-  test("should be able to create new category and also delete that category", async ({ page }) => {
-    await login(page, adminUser);
-    await navigateToCreateCategoriesPage(page, adminUser);
+  await categoryTextbox.click();
+  await categoryTextbox.fill("Test Category");
+  await submitButton.click();
 
-    const categoryTextbox = page.getByRole("textbox", { name: "Enter New Category" });
-    const submitButton = page.getByRole("button", { name: "Submit" });
+  // Check if category is successfully created
+  await expect(page.getByText("Test Category is created")).toBeVisible();
+  await expect(page.locator('td').filter({ hasText: /^Test Category$/ })).toBeVisible();
 
-    await categoryTextbox.click();
-    await categoryTextbox.fill("Test Category");
-    await submitButton.click();
+  // Go to Create Product tab
+  const createProductTab = page.getByRole("link", { name: "Create Product" });
+  await createProductTab.click();
 
-    await expect(page.locator('div').filter({ hasText: /^Test Category is created$/ })).toBeVisible();
-    await expect(page.locator('td').filter({ hasText: "Test Category" })).toBeVisible();
-
-    // const deleteButton = page.getByRole("button", { name: "Delete" }).nth(3);
-
-    // await deleteButton.click();
-
-    // await expect(page.locator('status').filter({ hasText: /^category is deleted$/ })).toBeVisible();
-    // await expect(page.locator('td').filter({ hasText: "Test Category" })).toBeVisible();
-  });
-
-  // test("should be able to delete a category", async ({ page }) => {
-  //   await login(page, adminUser);
-  //   await navigateToCreateCategoriesPage(page, adminUser);
-
-  //   const deleteButton = page.getByRole("button", { name: "Delete" }).nth(3);
-
-  //   await deleteButton.click();
-
-  //   await expect(page.locator('status').filter({ hasText: /^category deleted successfully$/ })).toBeVisible();
-  //   await expect(page.locator('td').filter({ hasText: "Test Category" })).not.toBeVisible();
-  // });
+  await page.getByLabel('Select a category').click();
+  await page.getByRole('option', { name: 'Test Category' }).click();
+  await page.getByRole("textbox", { name: "write a name" }).fill("Crucible");
+  await page.getByRole("textbox", { name: "write a description" }).fill("Novel by James Rollins");
+  await page.getByRole("textbox", { name: "write a Price" }).fill("10");
+  await page.getByRole("textbox", { name: "write a quantity" }).fill("1");
+  await page.getByRole("textbox", { name: "write a name" }).fill("Crucible");
+  await page.getByLabel('Select Shipping').click();
+  await page.getByRole('option', { name: 'No' }).click();
+  await page.getByLabel('Select a category').click();
+  await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
 });
 
 async function login(page, user) {
@@ -69,19 +143,8 @@ async function login(page, user) {
   const loginButton = page.getByRole("button", { name: "LOGIN" });
 
   await emailTextbox.click();
-  await emailTextbox.fill(user.email);
+  await emailTextbox.fill(adminEmail);
   await emailTextbox.press("Tab");
-  await passwordTextbox.fill(user.password);
+  await passwordTextbox.fill(adminPassword);
   await loginButton.click();
-}
-
-async function navigateToCreateCategoriesPage(page, user) {
-    const userTab = page.getByRole("button", { name: user.name });
-   await userTab.click();
- 
-   const dashboardTab = page.getByRole("link", { name: "Dashboard" });
-   await dashboardTab.click();
- 
-   const createCategoryTab = page.getByRole("link", { name: "Create Category" })
-   await createCategoryTab.click();
 }
