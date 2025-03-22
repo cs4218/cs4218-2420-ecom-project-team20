@@ -48,7 +48,9 @@ test.afterEach(async () => {
   await mongoose.disconnect();
 });
 
-test("create update and delete category and product UI test", async ({ page }) => {
+test("create update and delete category and product UI test", async ({
+  page,
+}) => {
   await page.goto("http://localhost:3000");
   await login(page);
 
@@ -89,7 +91,9 @@ test("create update and delete category and product UI test", async ({ page }) =
   const newCategoryForm = page.getByRole("dialog");
   await expect(newCategoryForm).toBeVisible();
 
-  const newCategoryTextbox = newCategoryForm.getByRole('textbox', { name: 'Enter new category' });
+  const newCategoryTextbox = newCategoryForm.getByRole("textbox", {
+    name: "Enter new category",
+  });
   await newCategoryTextbox.fill("Test-Category");
   await newCategoryForm.getByRole("button", { name: "Submit" }).click();
 
@@ -136,9 +140,7 @@ test("create update and delete category and product UI test", async ({ page }) =
 
   // Empty out all fields
   await page.getByPlaceholder("write a name").fill("");
-  await page
-    .getByPlaceholder("write a description")
-    .fill("");
+  await page.getByPlaceholder("write a description").fill("");
   await page.getByPlaceholder("write a Price").fill("");
   await page.getByPlaceholder("write a quantity").fill("");
 
@@ -163,14 +165,14 @@ test("create update and delete category and product UI test", async ({ page }) =
     .locator("h5")
     .filter({ hasText: /^Crucible: the Novel$/ })
     .click();
-  await page.getByRole("button", { name: "Delete Product" }).click();
 
   // Handle prompt to delete product
-  page.on("dialog", async (dialog) => {
-    assert(dialog.message() === "Are You Sure want to delete this product ? ");
-    await dialog.accept("Yes");
+  page.on("dialog", (dialog) => {
+    dialog.accept("Yes");
   });
+  await page.getByRole("button", { name: "Delete Product" }).click();
 
+  await expect(page.getByText("All Products List")).toBeVisible();
   await expect(
     page.locator("h5").filter({ hasText: /^Crucible: the Novel$/ })
   ).not.toBeVisible();
