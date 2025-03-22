@@ -20,6 +20,7 @@ import orderModel from "../models/orderModel.js";
 import slugify from "slugify";
 import fs from "fs";
 import braintree from "braintree";
+import { error } from "console";
 
 jest.mock("../models/orderModel.js", () => {
   const mockConstructor = jest.fn().mockImplementation(function (data) {
@@ -112,6 +113,10 @@ describe("Product Controller CRUD Test", () => {
     jest.useFakeTimers();
 
     req = {
+
+      params: {
+        pid: "mock-product-id",
+      },
       fields: {
         name: "Test Product",
         description: "This is description of test product",
@@ -546,7 +551,7 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({
         error: "Name is Required",
       });
@@ -557,7 +562,7 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({
         error: "Description is Required",
       });
@@ -568,7 +573,7 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({
         error: "Category is Required",
       });
@@ -579,7 +584,7 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({
         error: "Quantity is Required",
       });
@@ -590,7 +595,7 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({
         error: "photo is Required and should be less then 1mb",
       });
@@ -601,7 +606,7 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({
         error: "Price is Required",
       });
@@ -618,10 +623,10 @@ describe("Product Controller CRUD Test", () => {
 
       await updateProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(409);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
-        message: "Product Already Exists",
+        message: "Another product with this name already exists",
       });
       expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
     });
@@ -709,8 +714,8 @@ describe("Product Controller CRUD Test", () => {
       expect(spy).toHaveBeenCalledWith(mockError);
       expect(res.send).toHaveBeenCalledWith({
         success: false,
-        error: mockError,
-        message: "Error in Updte product",
+        error: mockError.message,
+        message: "Error in Update product",
       });
 
       spy.mockRestore();

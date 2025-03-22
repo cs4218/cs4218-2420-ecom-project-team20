@@ -56,6 +56,8 @@
     "wait-on": "^8.0.3"
   },
   "jest": {
+  "collectCoverage": true,
+  "coverageReporters": ["lcov", "text-summary"],
     "testEnvironment": "jest-environment-jsdom",
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
