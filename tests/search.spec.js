@@ -8,23 +8,31 @@ import productModel from '../models/productModel.js';
 
 const mockSearchResults = [
   {
-    _id: 1,
+    _id: "66db427fdb0119d9234b27f1",
     name: "Textbook",
     slug: "textbook",
     description: "A comprehensive textbook",
     price: 79.99,
-    category: "book",
+    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
     quantity: 50,
+    photo: {
+      data: Buffer.from('book image placeholder', 'utf-8'),
+      contentType: 'image/png',
+    },
     shipping: false,
   },
   {
-    _id: 2,
+    _id: "67a2171ea6d9e00ef2ac0229",
     name: "The Law of Contract in Singapore",
     slug: "the-law-of-contract-in-singapore",
     description: "A bestselling book in Singapore",
     price: 54.99,
-    category: "book",
+    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
     quantity: 200,
+    photo: {
+      data: Buffer.from('book image placeholder', 'utf-8'),
+      contentType: 'image/png',
+    },
     shipping: true,
   },
 ];
@@ -32,33 +40,8 @@ const mockSearchResults = [
 test.beforeAll(async () => {
   const uri = await fs.readFile('.mongo-uri', 'utf-8');
   await mongoose.connect(uri);
-
-  const searchResult1 = new productModel({
-    name: "Textbook",
-    slug: "textbook",
-    description: "A comprehensive textbook",
-    price: 79.99,
-    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
-    quantity: 50,
-    photo: {
-      data: Buffer.from('book image placeholder', 'utf-8'),
-      contentType: 'image/png',
-    },
-    shipping: false,
-  });
-  const searchResult2 = new productModel({
-    name: "The Law of Contract in Singapore",
-    slug: "the-law-of-contract-in-singapore",
-    description: "A bestselling book in Singapore",
-    price: 54.99,
-    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
-    quantity: 200,
-    photo: {
-      data: Buffer.from('book image placeholder', 'utf-8'),
-      contentType: 'image/png',
-    },
-    shipping: true,
-  });
+  const searchResult1 = new productModel(mockSearchResults[0]);
+  const searchResult2 = new productModel(mockSearchResults[1]);
   const bookCategory = new categoryModel({
     name: "book",
     slug: "book",
@@ -124,100 +107,88 @@ test.describe("Search for a product", () => {
   });
 
   test("should display products that exist for search query", async ({ page }) => {
-      const searchBar = page.getByRole("searchbox", { name: 'Search' });
-      await searchBar.click();
-      await searchBar.fill('book');
-      await searchBar.press('Enter');
-      await page.waitForURL("http://localhost:3000/search");
+    const searchBar = page.getByRole("searchbox", { name: 'Search' });
+    await searchBar.click();
+    await searchBar.fill('book');
+    await searchBar.press('Enter');
+    await page.waitForURL("http://localhost:3000/search");
 
-      const resultsCount = page.getByRole("heading", { name: "Found 2" });
-      await expect(resultsCount).toBeVisible();
+    const resultsCount = page.getByRole("heading", { name: "Found 2" });
+    await expect(resultsCount).toBeVisible();
+
+    const title_1 = page.getByRole('heading', { name: 'The Law of Contract in' });
+    const title_2 = page.getByRole('heading', { name: 'Textbook' });
+    const description_1 = page.getByText('A bestselling book in');
+    const description_2 = page.getByText('A comprehensive textbook...');
+    const price_1 = page.getByText('$79.99');
+    const price_2 = page.getByText('$54.99');
+    const image_1 = page.getByTestId('s-img-The Law of Contract in Singapore');
+    const image_2 = page.getByTestId('s-img-Textbook');
+    const button_1 = page.getByTestId('s-md-button-textbook');
+    const button_2 = page.getByTestId('s-md-button-the-law-of-contract-in-singapore');
+
+    await expect(title_1).toBeVisible();
+    await expect(title_2).toBeVisible();
+    await expect(description_1).toBeVisible();
+    await expect(description_2).toBeVisible();
+    await expect(price_1).toBeVisible();
+    await expect(price_2).toBeVisible();
+    await expect(image_1).toBeVisible();
+    await expect(image_2).toBeVisible();
+    await expect(button_1).toBeVisible();
+    await expect(button_2).toBeVisible();
+
+    // NOTE: Tests would not pass for original method because title which was rendered did not always match the full one due to scope of view
+    // mockSearchResults.map(async (searchResult) => {
+    //   const name = page.getByRole("heading", { name: searchResult.name })
+    //   const description = page.getByText(`${ searchResult.description.substring(0, 30) }...`);
+    //   const price = page.getByText(`$${ searchResult.price }`);
+    //   const image = page.getByTestId(`s-img-${ searchResult.name }`);
+    //   const button = page.getByTestId(`s-md-button-${ searchResult.slug }`);
+    //
+    //   await expect(name).toBeVisible();
+    //   await expect(description).toBeVisible();
+    //   await expect(price).toBeVisible();
+    //   await expect(image).toBeVisible();
+    //   await expect(button).toBeVisible();
+    // });
   });
 
-  // test("should display products that exist for search query", async ({ page }) => {
-  //   const searchBar = page.getByRole("searchbox", { name: 'Search' });
-  //
-  //   await searchBar.click();
-  //   await searchBar.fill('book');
-  //   await searchBar.press('Enter');
-  //   await page.waitForURL("http://localhost:3000/search");
-  //
-  //   const resultsCount = page.getByRole("heading", { name: "Found 2" });
-  //   await expect(resultsCount).toBeVisible();
-  //
-  //   const title_1 = page.getByRole('heading', { name: 'The Law of Contract in' });
-  //   const title_2 = page.getByRole('heading', { name: 'Textbook' });
-  //   const description_1 = page.getByText('A bestselling book in');
-  //   const description_2 = page.getByText('A comprehensive textbook...');
-  //   const price_1 = page.getByText('$79.99');
-  //   const price_2 = page.getByText('$54.99');
-  //   const image_1 = page.getByTestId('s-img-The Law of Contract in Singapore');
-  //   const image_2 = page.getByTestId('s-img-Textbook');
-  //   const button_1 = page.getByTestId('s-md-button-textbook');
-  //   const button_2 = page.getByTestId('s-md-button-the-law-of-contract-in-singapore');
-  //
-  //   await expect(title_1).toBeVisible();
-  //   await expect(title_2).toBeVisible();
-  //   await expect(description_1).toBeVisible();
-  //   await expect(description_2).toBeVisible();
-  //   await expect(price_1).toBeVisible();
-  //   await expect(price_2).toBeVisible();
-  //   await expect(image_1).toBeVisible();
-  //   await expect(image_2).toBeVisible();
-  //   await expect(button_1).toBeVisible();
-  //   await expect(button_2).toBeVisible();
-  //
-  //   // NOTE: Tests would not pass for original method because title which was rendered did not always match the full one due to scope of view
-  //   // mockSearchResults.map(async (searchResult) => {
-  //   //   const name = page.getByRole("heading", { name: searchResult.name })
-  //   //   const description = page.getByText(`${ searchResult.description.substring(0, 30) }...`);
-  //   //   const price = page.getByText(`$${ searchResult.price }`);
-  //   //   const image = page.getByTestId(`s-img-${ searchResult.name }`);
-  //   //   const button = page.getByTestId(`s-md-button-${ searchResult.slug }`);
-  //   //
-  //   //   await expect(name).toBeVisible();
-  //   //   await expect(description).toBeVisible();
-  //   //   await expect(price).toBeVisible();
-  //   //   await expect(image).toBeVisible();
-  //   //   await expect(button).toBeVisible();
-  //   // });
-  // });
+  test("should display message when products don't exist for search query", async ({ page }) => {
+    const searchBar = page.getByRole("searchbox", { name: "Search" });
 
-  // test("should display message when products don't exist for search query", async ({ page }) => {
-  //   const searchBar = page.getByRole("searchbox", { name: "Search" });
-  //
-  //   await searchBar.click();
-  //   await searchBar.fill("nonexistent");
-  //   await searchBar.press("Enter");
-  //   await page.waitForURL("http://localhost:3000/search");
-  //
-  //   const heading = page.getByRole("heading", { name: "Search Results" });
-  //   const message = page.getByText("No Products Found");
-  //
-  //   await expect(heading).toBeVisible();
-  //   await expect(message).toBeVisible();
-  // });
+    await searchBar.click();
+    await searchBar.fill("nonexistent");
+    await searchBar.press("Enter");
+    await page.waitForURL("http://localhost:3000/search");
 
-  // test("should navigate to product page when 'More Details' button is clicked", async ({ page }) => {
-  //   const searchBar = page.getByRole("searchbox", { name: 'Search' });
-  //
-  //   await searchBar.click();
-  //   await searchBar.fill('book');
-  //   await searchBar.press('Enter');
-  //   await page.waitForURL("http://localhost:3000/search");
-  //
-  //   const button = page.getByTestId(`s-md-button-${ mockSearchResults[0].slug }`);
-  //
-  //   await expect(button).toBeVisible();
-  //   await button.click();
-  //   await page.waitForURL(`http://localhost:3000/product/${ mockSearchResults[0].slug }`);
-  //
-  //   await expect(page.getByRole('heading', { name: 'Product Details' })).toBeVisible();
-  //   await expect(page.getByRole('heading', { name: 'Name: Textbook' })).toBeVisible();
-  //   await expect(page.getByRole('heading', { name: 'Description: A comprehensive' })).toBeVisible();
-  //   await expect(page.getByRole('heading', { name: 'Price: $79.99' })).toBeVisible();
-  //   await expect(page.getByTestId('pd-image-Textbook')).toBeVisible();
-  //   await expect(page.getByRole('heading', { name: 'Similar Products ➡️' })).toBeVisible();
-  //   await expect(page.getByRole('button', { name: 'ADD TO CART' })).toBeVisible();
-  // });
+    const heading = page.getByRole("heading", { name: "Search Results" });
+    const message = page.getByText("No Products Found");
+
+    await expect(heading).toBeVisible();
+    await expect(message).toBeVisible();
+  });
+
+  test("should navigate to product page when 'More Details' button is clicked", async ({ page }) => {
+    const searchBar = page.getByRole("searchbox", { name: 'Search' });
+
+    await searchBar.click();
+    await searchBar.fill('book');
+    await searchBar.press('Enter');
+    await page.waitForURL("http://localhost:3000/search");
+
+    const button = page.getByTestId(`s-md-button-${ mockSearchResults[0].slug }`);
+
+    await expect(button).toBeVisible();
+    await button.click();
+    await page.waitForURL(`http://localhost:3000/product/${ mockSearchResults[0].slug }`);
+
+    await expect(page.getByRole('heading', { name: 'Product Details' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Name: Textbook' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Description: A comprehensive' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Price: $79.99' })).toBeVisible();
+    await expect(page.getByTestId('pd-image-Textbook')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Similar Products ➡️' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'ADD TO CART' })).toBeVisible();
+  });
 });
