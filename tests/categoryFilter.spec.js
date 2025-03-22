@@ -78,7 +78,6 @@ test('should filter products by category selection', async ({ page }) => {
     await page.getByRole('main').getByText('literature').click();
     await expect(page.getByText('fantasy-chronicles')).toBeVisible();
     await expect(page.getByText('pulse-tracker-pro')).not.toBeVisible();
-
  
     await page.getByRole('main').getByText('literature').click(); // Deselect literature
     await page.getByRole('main').getByText('gadgets').click();    // Select gadgets
