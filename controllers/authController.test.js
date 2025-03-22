@@ -382,7 +382,10 @@ describe("Test Controller", () => {
 
   test("should send Protected Routes", () => {
     testController(req, res);
-    expect(res.send).toHaveBeenCalledWith({message: "Protected Routes", success: true});
+    expect(res.send).toHaveBeenCalledWith({
+      message: "Protected Routes",
+      success: true,
+    });
   });
 });
 
@@ -501,12 +504,16 @@ describe("Get Orders Controller", () => {
   });
 
   test("should return orders for buyer", async () => {
+    jest.spyOn(userModel, "findById").mockResolvedValue({ _id: req.user._id });
     const mockPopulateSecond = jest.fn().mockResolvedValue(ordersArray);
     const mockPopulateFirst = jest.fn(() => ({ populate: mockPopulateSecond }));
     orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
     await getOrdersController(req, res);
     expect(orderModel.find).toHaveBeenCalledWith({ buyer: req.user._id });
-    expect(res.json).toHaveBeenCalledWith({orders: ordersArray, success: true});
+    expect(res.json).toHaveBeenCalledWith({
+      orders: ordersArray,
+      success: true,
+    });
   });
 
   test("should handle error while getting orders", async () => {
@@ -545,7 +552,10 @@ describe("Get All Orders Controller", () => {
     orderModel.find.mockReturnValue({ populate: mockPopulateFirst });
     await getAllOrdersController(req, res);
     expect(orderModel.find).toHaveBeenCalledWith({});
-    expect(res.json).toHaveBeenCalledWith({success: true, orders: ordersArray});
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      orders: ordersArray,
+    });
   });
 
   test("should handle error while getting all orders", async () => {
@@ -587,7 +597,7 @@ describe("Order Status Controller", () => {
       { status: req.body.status },
       { new: true }
     );
-    expect(res.json).toHaveBeenCalledWith({success: true,updatedOrder});
+    expect(res.json).toHaveBeenCalledWith({ success: true, updatedOrder });
   });
 
   test("should handle error while updating order status", async () => {
