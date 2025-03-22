@@ -66,6 +66,7 @@ describe("authController forgotPasswordController integration tests", () => {
 
   afterEach(async () => {
     jest.restoreAllMocks();
+    await UserModel.deleteMany({});
   });
 
   afterAll(async () => {

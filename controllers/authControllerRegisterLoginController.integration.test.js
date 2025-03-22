@@ -20,27 +20,6 @@ const userProfile = {
 describe("authController loginController and registerController integration tests", () => {
   let registerReq, registerRes, loginReq, loginRes;
 
-  registerReq = {
-    body: userProfile,
-  };
-
-  registerRes = {
-    status: jest.fn().mockReturnThis(),
-    send: jest.fn(),
-  };
-
-  loginReq = {
-    body: {
-      email: "johndoe@test.com",
-      password: "johndoe@test.com",
-    },
-  };
-
-  loginRes = {
-    status: jest.fn().mockReturnThis(),
-    send: jest.fn(),
-  };
-
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
@@ -48,13 +27,32 @@ describe("authController loginController and registerController integration test
   });
 
   beforeEach(async () => {
-    await mongoose.connection.createCollection("users");
+    registerReq = {
+      body: userProfile,
+    };
+
+    registerRes = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    loginReq = {
+      body: {
+        email: "johndoe@test.com",
+        password: "johndoe@test.com",
+      },
+    };
+
+    loginRes = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
     jest.spyOn(JWT, "sign").mockReturnValue("mocked-jwt-token");
   });
 
   afterEach(async () => {
-    await mongoose.connection.dropCollection("users");
     jest.restoreAllMocks();
+    await UserModel.deleteMany({});
   });
 
   afterAll(async () => {
@@ -88,6 +86,56 @@ describe("authController loginController and registerController integration test
         user: expect.objectContaining({
           email: loginReq.body.email,
         }),
+      })
+    );
+  });
+
+  it("should not register a user with an existing email", async () => {
+    await registerController(registerReq, registerRes);
+    await registerController(registerReq, registerRes);
+
+    expect(registerRes.status).toHaveBeenCalledWith(200);
+    expect(registerRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Already registered, please login",
+      })
+    );
+  });
+
+  it("should hash the password before saving to the database", async () => {
+    await registerController(registerReq, registerRes);
+
+    const user = await UserModel.findOne({ email: userProfile.email });
+
+    expect(user).not.toBeNull();
+    expect(user.password).not.toBe(userProfile.password); // Ensure password is hashed
+  });
+
+  it("should not log in a non-existent user", async () => {
+    await loginController(loginReq, loginRes);
+
+    expect(loginRes.status).toHaveBeenCalledWith(404);
+    expect(loginRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Email is not registered",
+      })
+    );
+  });
+
+  it("should not log in with an incorrect password", async () => {
+    await registerController(registerReq, registerRes);
+
+    loginReq.body.password = "wrongpassword";
+
+    await loginController(loginReq, loginRes);
+
+    expect(loginRes.status).toHaveBeenCalledWith(401);
+    expect(loginRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Invalid Password",
       })
     );
   });
