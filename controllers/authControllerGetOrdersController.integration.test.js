@@ -9,49 +9,8 @@ import { jest } from "@jest/globals";
 
 let mongoServer;
 
-const userProfile = new UserModel({
-  name: "John Doe",
-  email: "johndoe@test.com",
-  password: "johndoe@test.com",
-  phone: "1234567890",
-  address: "123 Street",
-  dob: "1990-01-01",
-  answer: "Football",
-});
-
-const category = new CategoryModel({
-  name: "Electronics",
-  slug: "electronics",
-});
-
-const product = new ProductModel({
-  name: "Test Laptop",
-  slug: "test-laptop",
-  description: "A high-performance test laptop",
-  price: 999.99,
-  category: category._id,
-  quantity: 10,
-  shipping: true,
-});
-
-const order = new OrderModel({
-  products: [product._id],
-  payment: { method: "Credit Card", amount: 99.99 },
-  buyer: userProfile._id,
-  status: "Processing",
-});
-
 describe("authController getOrdersController integration tests", () => {
-  let req, res;
-  req = {
-    user: { _id: userProfile._id },
-  };
-
-  res = {
-    status: jest.fn().mockReturnThis(),
-    json: jest.fn(),
-    send: jest.fn(),
-  };
+  let req, res, userProfile, category, product, order;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -60,21 +19,54 @@ describe("authController getOrdersController integration tests", () => {
   });
 
   beforeEach(async () => {
-    await mongoose.connection.createCollection("users");
-    await mongoose.connection.createCollection("categories");
-    await mongoose.connection.createCollection("products");
-    await mongoose.connection.createCollection("orders");
-    await userProfile.save();
-    await category.save();
-    await product.save();
-    await order.save();
+    userProfile = await new UserModel({
+      name: "John Doe",
+      email: "johndoe@test.com",
+      password: "johndoe@test.com",
+      phone: "1234567890",
+      address: "123 Street",
+      dob: "1990-01-01",
+      answer: "Football",
+    }).save();
+
+    category = await new CategoryModel({
+      name: "Electronics",
+      slug: "electronics",
+    }).save();
+
+    product = await new ProductModel({
+      name: "Test Laptop",
+      slug: "test-laptop",
+      description: "A high-performance test laptop",
+      price: 999.99,
+      category: category._id,
+      quantity: 10,
+      shipping: true,
+    }).save();
+
+    order = await new OrderModel({
+      products: [product._id],
+      payment: { method: "Credit Card", amount: 99.99 },
+      buyer: userProfile._id,
+      status: "Processing",
+    }).save();
+
+    req = {
+      user: { _id: userProfile._id },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      send: jest.fn(),
+    };
   });
 
   afterEach(async () => {
-    await mongoose.connection.dropCollection("users");
-    await mongoose.connection.dropCollection("categories");
-    await mongoose.connection.dropCollection("products");
-    await mongoose.connection.dropCollection("orders");
+    await UserModel.deleteMany({});
+    await OrderModel.deleteMany({});
+    await ProductModel.deleteMany({});
+    await CategoryModel.deleteMany({});
   });
 
   afterAll(async () => {
@@ -95,5 +87,30 @@ describe("authController getOrdersController integration tests", () => {
     const firstOrder = responseData.orders[0];
     expect(firstOrder).toHaveProperty("buyer.name", "John Doe");
     expect(firstOrder).toHaveProperty("status", "Processing");
+  });
+
+  it("should return an empty array if the user has no orders", async () => {
+    await OrderModel.deleteMany({ buyer: userProfile._id });
+
+    await getOrdersController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const responseData = res.json.mock.calls[0][0];
+    expect(responseData).toHaveProperty("success", true);
+    expect(responseData.orders).toEqual([]);
+  });
+
+  it("should return an error if the user does not exist", async () => {
+    req.user._id = new mongoose.Types.ObjectId();
+
+    await getOrdersController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "User not found",
+      })
+    );
   });
 });

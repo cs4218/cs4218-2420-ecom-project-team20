@@ -11,7 +11,7 @@
     "sonarqube": "sonarqube-scanner",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --silent",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
-    "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js --detectOpenHandles --silent"
+    "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js --detectOpenHandles"
   },
   "keywords": [],
   "author": "RP",

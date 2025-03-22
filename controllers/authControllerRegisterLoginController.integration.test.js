@@ -49,13 +49,6 @@ describe("authController loginController and registerController integration test
 
   beforeEach(async () => {
     await mongoose.connection.createCollection("users");
-    registerReq = { body: userProfile };
-    registerRes = { status: jest.fn().mockReturnThis(), send: jest.fn() };
-
-    loginReq = {
-      body: { email: "johndoe@test.com", password: "johndoe@test.com" },
-    };
-    loginRes = { status: jest.fn().mockReturnThis(), send: jest.fn() };
     jest.spyOn(JWT, "sign").mockReturnValue("mocked-jwt-token");
   });
 
