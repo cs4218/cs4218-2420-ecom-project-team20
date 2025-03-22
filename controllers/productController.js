@@ -309,7 +309,7 @@ export const searchProductController = async (req, res) => {
         ],
       })
       .select("-photo");
-    res.json({success: true, results});
+    res.json(results);
   } catch (error) {
     console.log(error);
     res.status(400).send({

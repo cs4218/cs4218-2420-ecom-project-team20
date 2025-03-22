@@ -935,7 +935,7 @@ describe("Product Controller Advanced Functions Test", () => {
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({success: true, results:mockProductsList});
+      expect(res.json).toHaveBeenCalledWith(mockProductsList);
     });
 
     it("should handle errors", async () => {

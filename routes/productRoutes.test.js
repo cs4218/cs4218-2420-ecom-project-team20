@@ -290,9 +290,8 @@ describe('Product Routes Integration Tests', () => {
         .get('/api/v1/product/search/Smart');
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty('success', true);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      expect(response.body.results.length).toBe(2);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(2);
     });
 
     test('Should get related products', async () => {
