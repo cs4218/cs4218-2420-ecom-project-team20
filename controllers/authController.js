@@ -89,7 +89,7 @@ export const loginController = async (req, res) => {
     }
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(200).send({
+      return res.status(401).send({
         success: false,
         message: "Invalid Password",
       });
@@ -161,7 +161,7 @@ export const forgotPasswordController = async (req, res) => {
 // test controller
 export const testController = (req, res) => {
   try {
-    res.send("Protected Routes");
+    res.send({ success: true, message: "Protected Routes" });
   } catch (error) {
     console.log(error);
     res.send({ error });
@@ -181,6 +181,7 @@ export const updateProfileController = async (req, res) => {
       req.user._id,
       {
         name: name || user.name,
+        email: email || user.email,
         password: hashedPassword || user.password,
         phone: phone || user.phone,
         address: address || user.address,
@@ -209,7 +210,10 @@ export const getOrdersController = async (req, res) => {
       .find({ buyer: req.user._id })
       .populate("products", "-photo")
       .populate("buyer", "name");
-    res.json(orders);
+    res.status(200).json({
+      success: true,
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -228,7 +232,10 @@ export const getAllOrdersController = async (req, res) => {
       .populate("products", "-photo")
       .populate("buyer", "name")
       .sort({ createdAt: -1 });
-    res.json(orders);
+    res.status(200).json({
+      success: true,
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -249,7 +256,10 @@ export const orderStatusController = async (req, res) => {
       { status },
       { new: true }
     );
-    res.json(updatedOrder);
+    res.status(200).json({
+      success: true,
+      updatedOrder,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({

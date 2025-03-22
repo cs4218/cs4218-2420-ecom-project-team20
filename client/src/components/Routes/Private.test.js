@@ -6,6 +6,7 @@ import "@testing-library/jest-dom";
 import React from "react";
 import axios from "axios";
 import { beforeEach } from "node:test";
+import { useNavigate } from "react-router-dom";
 
 jest.mock("axios");
 jest.mock("../../context/auth", () => ({

@@ -7,19 +7,27 @@ import useCategory from "../hooks/useCategory";
 import { useCart } from "../context/cart";
 import { Badge } from "antd";
 import "../styles/Header.css";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [auth, setAuth] = useAuth();
   const [cart] = useCart();
   const categories = useCategory();
-  const handleLogout = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = (e) => {
+    e.preventDefault();
     setAuth({
       ...auth,
       user: null,
       token: "",
     });
     localStorage.removeItem("auth");
-    toast.success("Logout Successfully");
+    navigate("/login");
+
+    setTimeout(() => {
+      toast.success("Logout Successfully");
+    }, 500);
   };
   return (
     <>
@@ -41,41 +49,40 @@ const Header = () => {
               🛒 Virtual Vault
             </Link>
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              <SearchInput />
-              <li className="nav-item">
-                <NavLink to="/" className="nav-link ">
-                  Home
-                </NavLink>
-              </li>
-              <li className="nav-item dropdown">
-                <Link
-                  className="nav-link dropdown-toggle"
-                  to={"/categories"}
-                  data-bs-toggle="dropdown"
-                >
-                  Categories
-                </Link>
-                <ul className="dropdown-menu">
-                  <li>
-                    <Link className="dropdown-item" to={"/categories"}>
-                      All Categories
-                    </Link>
-                  </li>
-                  {categories?.map((c) => (
-                    <li key={c.slug}>
-                      <Link
-                        className="dropdown-item"
-                        to={`/category/${c.slug}`}
-                      >
-                        {c.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-
               {!auth?.user ? (
                 <>
+                  <SearchInput />
+                  <li className="nav-item">
+                    <NavLink to="/" className="nav-link ">
+                      Home
+                    </NavLink>
+                  </li>
+                  <li className="nav-item dropdown">
+                    <Link
+                      className="nav-link dropdown-toggle"
+                      to={"/categories"}
+                      data-bs-toggle="dropdown"
+                    >
+                      Categories
+                    </Link>
+                    <ul className="dropdown-menu">
+                      <li>
+                        <Link className="dropdown-item" to={"/categories"}>
+                          All Categories
+                        </Link>
+                      </li>
+                      {categories?.map((c) => (
+                        <li key={c.slug}>
+                          <Link
+                            className="dropdown-item"
+                            to={`/category/${c.slug}`}
+                          >
+                            {c.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
                   <li className="nav-item">
                     <NavLink to="/register" className="nav-link">
                       Register
@@ -89,16 +96,47 @@ const Header = () => {
                 </>
               ) : (
                 <>
+                  <SearchInput />
+                  <li className="nav-item">
+                    <NavLink to="/" className="nav-link ">
+                      Home
+                    </NavLink>
+                  </li>
                   <li className="nav-item dropdown">
-                    <NavLink
+                    <Link
+                      className="nav-link dropdown-toggle"
+                      to={"/categories"}
+                      data-bs-toggle="dropdown"
+                    >
+                      Categories
+                    </Link>
+                    <ul className="dropdown-menu">
+                      <li>
+                        <Link className="dropdown-item" to={"/categories"}>
+                          All Categories
+                        </Link>
+                      </li>
+                      {categories?.map((c) => (
+                        <li key={c.slug}>
+                          <Link
+                            className="dropdown-item"
+                            to={`/category/${c.slug}`}
+                          >
+                            {c.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                  <li className="nav-item dropdown">
+                    <a
                       className="nav-link dropdown-toggle"
                       href="#"
                       role="button"
                       data-bs-toggle="dropdown"
-                      style={{ border: "none" }}
                     >
                       {auth?.user?.name}
-                    </NavLink>
+                    </a>
                     <ul className="dropdown-menu">
                       <li>
                         <NavLink
@@ -111,25 +149,24 @@ const Header = () => {
                         </NavLink>
                       </li>
                       <li>
-                        <NavLink
-                          onClick={handleLogout}
-                          to="/login"
+                        <button
                           className="dropdown-item"
+                          onClick={(e) => handleLogout(e)}
                         >
                           Logout
-                        </NavLink>
+                        </button>
                       </li>
                     </ul>
                   </li>
+                  <li className="nav-item d-flex align-items-center">
+                    <Badge count={cart?.length} showZero>
+                      <NavLink to="/cart" className="nav-link ">
+                        Cart
+                      </NavLink>
+                    </Badge>
+                  </li>
                 </>
               )}
-              <li className="nav-item">
-                <Badge count={cart?.length} showZero>
-                  <NavLink to="/cart" className="nav-link">
-                    Cart
-                  </NavLink>
-                </Badge>
-              </li>
             </ul>
           </div>
         </div>

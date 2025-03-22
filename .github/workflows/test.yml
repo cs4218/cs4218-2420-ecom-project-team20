@@ -11,6 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,7 +21,7 @@ jobs:
         with:
           node-version: "23"
 
-      - name: Install dependencies
+      - name: Install dependencies (server)
         run: npm install
 
       - name: Install client dependencies
@@ -29,3 +30,5 @@ jobs:
 
       - name: Run Jest tests
         run: npm test
+        env:
+          NODE_ENV: testing
