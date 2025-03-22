@@ -346,11 +346,29 @@ export const realtedProductController = async (req, res) => {
   }
 };
 
-// get prdocyst by catgory
+// get products by category
 export const productCategoryController = async (req, res) => {
   try {
-    const category = await categoryModel.findOne({ slug: req.params.slug });
-    const products = await productModel.find({ category }).populate("category");
+    const { slug } = req.params;
+    
+    if (!slug) {
+      return res.status(400).send({
+        success: false,
+        message: "Category slug is required"
+      });
+    }
+    
+    const category = await categoryModel.findOne({ slug });
+    
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found"
+      });
+    }
+    
+    const products = await productModel.find({ category: category._id }).populate("category");
+    
     res.status(200).send({
       success: true,
       category,
@@ -360,8 +378,8 @@ export const productCategoryController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
-      error,
-      message: "Error While Getting products",
+      error: error,
+      message: "Error While Getting products"
     });
   }
 };
