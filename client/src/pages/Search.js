@@ -7,6 +7,8 @@ const Search = () => {
   const [values, setValues] = useSearch();
   const navigate = useNavigate();
 
+  console.log("Search values", values);
+
   return (
     <Layout title={ "Search results" }>
       <div className="container">
@@ -18,7 +20,7 @@ const Search = () => {
               : `Found ${ values?.results.length }` }
           </h6>
           <div className="d-flex flex-wrap mt-4">
-            { values?.results.map((p) => (
+            {values?.results.map((p) => (
               <div className="card m-2" style={ { width: "18rem" } }>
                 <img
                   src={ `/api/v1/product/product-photo/${ p._id }` }
