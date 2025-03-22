@@ -207,6 +207,13 @@ export const updateProfileController = async (req, res) => {
 // orders
 export const getOrdersController = async (req, res) => {
   try {
+    const userExists = await userModel.findById(req.user._id);
+    if (!userExists) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
     const orders = await orderModel
       .find({ buyer: req.user._id })
       .populate("products", "-photo")

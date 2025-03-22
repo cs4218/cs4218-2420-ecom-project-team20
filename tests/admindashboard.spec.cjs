@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
   await mongoose.connect(uri);
   await deleteUser(adminEmail);
 
-  // Create admin user
+  // create admin user
   adminName = "admin";
   adminEmail = "admin@test.com";
   adminPassword = "admin@test.com";

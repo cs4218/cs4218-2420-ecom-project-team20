@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { registerController } from "./authController";
+import { registerController, loginController } from "./authController";
 import { jest } from "@jest/globals";
 import UserModel from "../models/userModel";
 import { forgotPasswordController } from "./authController";
+import JWT from "jsonwebtoken";
 
 let mongoServer;
 
@@ -18,7 +19,12 @@ const userProfile = {
 };
 
 describe("authController forgotPasswordController integration tests", () => {
-  let registerReq, registerRes, forgotPasswordReq, forgotPasswordRes;
+  let registerReq,
+    registerRes,
+    forgotPasswordReq,
+    forgotPasswordRes,
+    loginReq,
+    loginRes;
 
   registerReq = {
     body: userProfile,
@@ -42,6 +48,12 @@ describe("authController forgotPasswordController integration tests", () => {
     send: jest.fn(),
   };
 
+  loginReq = {
+    body: { email: "johndoe@test.com", password: "newpassword123" },
+  };
+
+  loginRes = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
@@ -49,14 +61,12 @@ describe("authController forgotPasswordController integration tests", () => {
   });
 
   beforeEach(async () => {
-    await mongoose.connection.createCollection("users");
-    registerReq = { body: userProfile };
-    registerRes = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+    jest.spyOn(JWT, "sign").mockReturnValue("mocked-jwt-token");
   });
 
   afterEach(async () => {
-    await mongoose.connection.dropCollection("users");
     jest.restoreAllMocks();
+    await UserModel.deleteMany({});
   });
 
   afterAll(async () => {
@@ -65,7 +75,7 @@ describe("authController forgotPasswordController integration tests", () => {
     await mongoServer.stop();
   });
 
-  it("should register a user and allow user to change password", async () => {
+  it("should register a user and allow user to change password and login again", async () => {
     await registerController(registerReq, registerRes);
 
     expect(registerRes.status).toHaveBeenCalledWith(201);
@@ -87,6 +97,59 @@ describe("authController forgotPasswordController integration tests", () => {
       expect.objectContaining({
         success: true,
         message: "Password reset successfully",
+      })
+    );
+
+    await loginController(loginReq, loginRes);
+    expect(loginRes.status).toHaveBeenCalledWith(200);
+    expect(loginRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        message: "Logged in successfully",
+        user: expect.objectContaining({
+          email: loginReq.body.email,
+        }),
+      })
+    );
+  });
+
+  it("should not reset password if the security answer is incorrect", async () => {
+    await registerController(registerReq, registerRes);
+
+    const wrongAnswerReq = {
+      body: {
+        email: userProfile.email,
+        answer: "WrongAnswer",
+        newPassword: "newpassword123",
+      },
+    };
+    await forgotPasswordController(wrongAnswerReq, forgotPasswordRes);
+
+    expect(forgotPasswordRes.status).toHaveBeenCalledWith(404);
+    expect(forgotPasswordRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Wrong email or answer",
+      })
+    );
+  });
+
+  it("should not reset password for a non-existent user", async () => {
+    const nonExistentForgotReq = {
+      body: {
+        email: "notregistered@test.com",
+        answer: "Football",
+        newPassword: "newpassword123",
+      },
+    };
+
+    await forgotPasswordController(nonExistentForgotReq, forgotPasswordRes);
+
+    expect(forgotPasswordRes.status).toHaveBeenCalledWith(404);
+    expect(forgotPasswordRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Wrong email or answer",
       })
     );
   });
