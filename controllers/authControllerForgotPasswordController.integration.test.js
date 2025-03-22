@@ -61,12 +61,10 @@ describe("authController forgotPasswordController integration tests", () => {
   });
 
   beforeEach(async () => {
-    await mongoose.connection.createCollection("users");
     jest.spyOn(JWT, "sign").mockReturnValue("mocked-jwt-token");
   });
 
   afterEach(async () => {
-    await mongoose.connection.dropCollection("users");
     jest.restoreAllMocks();
   });
 
@@ -110,6 +108,47 @@ describe("authController forgotPasswordController integration tests", () => {
         user: expect.objectContaining({
           email: loginReq.body.email,
         }),
+      })
+    );
+  });
+
+  it("should not reset password if the security answer is incorrect", async () => {
+    await registerController(registerReq, registerRes);
+
+    const wrongAnswerReq = {
+      body: {
+        email: userProfile.email,
+        answer: "WrongAnswer",
+        newPassword: "newpassword123",
+      },
+    };
+    await forgotPasswordController(wrongAnswerReq, forgotPasswordRes);
+
+    expect(forgotPasswordRes.status).toHaveBeenCalledWith(404);
+    expect(forgotPasswordRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Wrong email or answer",
+      })
+    );
+  });
+
+  it("should not reset password for a non-existent user", async () => {
+    const nonExistentForgotReq = {
+      body: {
+        email: "notregistered@test.com",
+        answer: "Football",
+        newPassword: "newpassword123",
+      },
+    };
+
+    await forgotPasswordController(nonExistentForgotReq, forgotPasswordRes);
+
+    expect(forgotPasswordRes.status).toHaveBeenCalledWith(404);
+    expect(forgotPasswordRes.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Wrong email or answer",
       })
     );
   });
