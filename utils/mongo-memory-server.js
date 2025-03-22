@@ -1,14 +1,9 @@
-
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryServer } from "mongodb-memory-server";
 
 let mongoServer;
 
 export async function startMongoMemoryServer() {
-  mongoServer = new MongoMemoryServer({
-    binary: {
-      version: '4.4.6',
-    },
-  });
+  mongoServer = new MongoMemoryServer();
   await mongoServer.start();
   return mongoServer.getUri();
 }
