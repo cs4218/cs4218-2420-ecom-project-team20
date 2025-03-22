@@ -23,8 +23,8 @@ test.beforeEach(async ({ page }) => {
 
   testUserEmail = "johndoe@test.com";
   await deleteUser(testUserEmail);
-
   testUserPassword = "johndoe@test.com";
+
   hashedPassword = await hashPassword("johndoe@test.com");
   const testUser = new UserModel({
     name: "John Doe",
@@ -57,7 +57,7 @@ test.describe("Login component", () => {
     await expect(page.getByRole("button", { name: "LOGIN" })).toBeVisible();
   });
 
-  test("should allow user to senter email and password", async ({ page }) => {
+  test("should allow user to enter email and password", async ({ page }) => {
     await page.getByPlaceholder("Enter Your Email").fill("janedoe@test.com");
     await page.getByPlaceholder("Enter Your Password").fill("janedoe@test.com");
 

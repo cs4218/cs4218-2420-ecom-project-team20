@@ -24,9 +24,10 @@ test.beforeEach(async ({ page }) => {
   testUserEmail = "johndoe@test.com";
   testUserPassword = "johndoe@test.com";
   await deleteUser(testUserEmail);
-  await deleteUser(existingUserEmail);
 
   existingUserEmail = "janedolly@test.com";
+  await deleteUser(existingUserEmail);
+
   hashedPassword = await hashPassword("janedolly@test.com");
   const existingUser = new UserModel({
     name: "Jane Dolly",
@@ -108,7 +109,6 @@ test.describe("Register component", () => {
 
     const resultToast = page.getByText(/Register Successfully, please login/);
     await expect(resultToast).toBeVisible();
-
     await expect(page).toHaveURL("http://localhost:3000/login");
   });
 

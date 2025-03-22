@@ -109,7 +109,7 @@ describe("authController loginController and registerController integration test
     const user = await UserModel.findOne({ email: userProfile.email });
 
     expect(user).not.toBeNull();
-    expect(user.password).not.toBe(userProfile.password); // Ensure password is hashed
+    expect(user.password).not.toBe(userProfile.password);
   });
 
   it("should not log in a non-existent user", async () => {
