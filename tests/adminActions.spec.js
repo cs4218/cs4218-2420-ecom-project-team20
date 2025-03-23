@@ -192,7 +192,7 @@ test("create update and delete category and product UI test", async ({
 
   await expect(page.getByText("All Products List")).toBeVisible();
   await expect(
-    page.locator("h5").filter({ hasText: /^Crucible: the Novel$/ })
+    page.locator("h5").filter({ hasText: "Crucible" })
   ).not.toBeVisible();
 
   // Go to Create Category tab

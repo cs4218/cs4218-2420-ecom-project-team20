@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs/promises';
 import mongoose from "mongoose";
 import CategoryModel from '../models/categoryModel.js';
-import ProductModel from '../models/ProductModel.js';
+import ProductModel from '../models/productModel.js';
 
 const mockSearchResults = [
   {
