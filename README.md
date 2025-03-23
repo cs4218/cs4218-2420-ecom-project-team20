@@ -105,10 +105,22 @@ npm run test:backend
 
 ### End-to-End Testing with Playwright
 
-The project includes Playwright for end-to-end testing. To run Playwright tests:
+All the Playwright Tests are under `/tests/` folder 
+
+The project includes Playwright for end-to-end testing, which can be run using below commands - 
+
+If you have Docker installed and running (Recommended):- 
+We use a mongodb docker container to reduce the latency reducing the number of flaky testcases -
 
 ```bash
-npx playwright test
+npm run test:ui-docker
+```
+
+Otherwise you can use the below command which will run an Instance of Mongodb using
+`mongo-memory-server` package
+
+```bash
+npm run test:ui
 ```
 
 ## Code Quality
