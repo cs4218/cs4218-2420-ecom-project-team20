@@ -14,6 +14,22 @@ const app = express();
 app.use(express.json());
 app.get("/api/v1/product/product-category/:slug", productController.productCategoryController);
 
+jest.mock("braintree", () => ({
+  BraintreeGateway: jest.fn(() => {
+    return {
+      clientToken: {
+        generate: jest.fn(),
+      },
+      transaction: {
+        sale: jest.fn(),
+      },
+    };
+  }),
+  Environment: {
+    Sandbox: "sandbox",
+  },
+}));
+
 const mockProducts = [
   {
     _id: "66db427fdb0119d9234b27f1",

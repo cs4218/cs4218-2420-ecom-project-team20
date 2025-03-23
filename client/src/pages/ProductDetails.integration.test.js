@@ -15,6 +15,22 @@ app.use(express.json());
 app.get("/api/v1/product/get-product/:slug", productController.getSingleProductController);
 app.get("/api/v1/product/related-product/:pid/:cid", productController.realtedProductController);
 
+jest.mock("braintree", () => ({
+  BraintreeGateway: jest.fn(() => {
+    return {
+      clientToken: {
+        generate: jest.fn(),
+      },
+      transaction: {
+        sale: jest.fn(),
+      },
+    };
+  }),
+  Environment: {
+    Sandbox: "sandbox",
+  },
+}));
+
 const mockProduct = {
   _id: "66db427fdb0119d9234b27f1",
   name: "Textbook",
