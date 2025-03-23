@@ -40,6 +40,7 @@ const mockSearchResults = [
 test.beforeAll(async () => {
   const uri = await fs.readFile('.mongo-uri', 'utf-8');
   await mongoose.connect(uri);
+
   const searchResult1 = new productModel(mockSearchResults[0]);
   const searchResult2 = new productModel(mockSearchResults[1]);
   const bookCategory = new categoryModel({
