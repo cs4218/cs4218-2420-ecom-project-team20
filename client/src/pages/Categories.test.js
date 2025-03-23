@@ -1,9 +1,13 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
+import { act } from "react-dom/test-utils";
 import Categories from "./Categories";
+import axios from "axios";
 import useCategory from "../hooks/useCategory";
 import "@testing-library/jest-dom/extend-expect";
+
+jest.mock("axios");
 
 jest.mock("../context/auth", () => ({
     useAuth: jest.fn(() => [null, jest.fn()]),
@@ -43,17 +47,23 @@ describe("Categories page", () => {
     expect(layout).toHaveAttribute("data-title", "All Categories");
   });
 
-  it("displays correct number of category links", () => {
-    useCategory.mockReturnValue(mockCategories);
-    renderWithRouter(<Categories />);
+  it("displays correct number of category links", async () => {
+    axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
+
+    await act(async () => {
+      renderWithRouter(<Categories />);
+    });
 
     const categoryLinks = screen.getAllByRole("link");
     expect(categoryLinks.length).toBe(mockCategories.length);
   });
 
-  it("renders category names and correct links", () => {
-    useCategory.mockReturnValue(mockCategories);
-    renderWithRouter(<Categories />);
+  it("renders category names and correct links", async () => {
+    axios.get.mockResolvedValue({ data: { success: true, category: mockCategories } });
+
+    await act(async () => {
+      renderWithRouter(<Categories />);
+    });
 
     mockCategories.forEach((category) => {
       const link = screen.getByText(category.name);
