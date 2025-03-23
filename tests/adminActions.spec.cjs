@@ -6,7 +6,8 @@ import categoryModel from "../models/categoryModel.js";
 import productModel from "../models/productModel.js";
 import userModel from "../models/userModel.js";
 import { hashPassword } from "../helpers/authHelper";
-import assert from "assert";
+import dotenv from 'dotenv'
+dotenv.config();
 
 let adminName;
 let adminEmail;
