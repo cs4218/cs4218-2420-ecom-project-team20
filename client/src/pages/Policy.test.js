@@ -46,6 +46,6 @@ describe("Policy page", () => {
           <Route path="/policy" element={<Policy />} />
           </Routes>
       </MemoryRouter>);
-      expect(screen.getByText("add privacy policy")).toBeInTheDocument();
+      expect(screen.getByText("At Virtual Vault, we respect your privacy and are committed to protecting it. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website. Please read this policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.")).toBeInTheDocument();
     });
 });
