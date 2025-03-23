@@ -45,7 +45,7 @@ CI Test Run Example [Here](https://github.com/cs4218/cs4218-2420-ecom-project-te
    cd ..
    ```
 
-4. Create a `.env` file in the root directory with the following variables:
+4. Copy and Paste `.env` file in the root directory provided in the zip with report:
    ```
    PORT=8080
    MONGO_URI=<your-mongodb-connection-string>
