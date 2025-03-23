@@ -5,8 +5,8 @@ import mongoose from "mongoose";
 import categoryModel from "../models/categoryModel.js";
 import productModel from "../models/productModel.js";
 import userModel from "../models/userModel.js";
-import { hashPassword } from "../helpers/authHelper.js";
-import dotenv from 'dotenv'
+import { hashPassword } from "../helpers/authHelper";
+import dotenv from "dotenv";
 dotenv.config();
 
 let adminName;
@@ -61,12 +61,15 @@ test("create update and delete category and product UI test", async ({
 
   await userTab.click();
 
-  const dashboardTab = page.locator("li").filter({ hasText: /^Dashboard$/ });
-  await dashboardTab.click();
+  await page.goto("http://localhost:3000/dashboard/admin");
 
   // Go to Create Category tab
   const createCategoryTab = page.getByRole("link", { name: "Create Category" });
   await createCategoryTab.click();
+
+  await expect(page).toHaveURL(
+    "http://localhost:3000/dashboard/admin/create-category"
+  );
 
   // Ensure category is not created yet
   await expect(page.getByText(`Test Category`)).not.toBeVisible();
@@ -111,6 +114,10 @@ test("create update and delete category and product UI test", async ({
   const createProductTab = page.getByRole("link", { name: "Create Product" });
   await createProductTab.click();
 
+  await expect(page).toHaveURL(
+    "http://localhost:3000/dashboard/admin/create-product"
+  );
+
   await page.getByRole("textbox", { name: "write a name" }).fill("Crucible");
   await page
     .getByRole("textbox", { name: "write a description" })
@@ -123,6 +130,9 @@ test("create update and delete category and product UI test", async ({
   await page.getByTitle("No").click();
   await page.getByRole("button", { name: "CREATE PRODUCT" }).click();
 
+  await expect(page).toHaveURL(
+    "http://localhost:3000/dashboard/admin/products"
+  );
   await expect(page.getByText("All Products List")).toBeVisible();
   await expect(
     page.locator("h5").filter({ hasText: /^Crucible$/ })
@@ -135,6 +145,10 @@ test("create update and delete category and product UI test", async ({
     .locator("h5")
     .filter({ hasText: /^Crucible$/ })
     .click();
+
+  await expect(page).toHaveURL(
+    "http://localhost:3000/dashboard/admin/product/Crucible"
+  );
   await expect(
     page.locator("h1").filter({ hasText: "Update Product" })
   ).toBeVisible();
@@ -154,6 +168,9 @@ test("create update and delete category and product UI test", async ({
   await page.getByPlaceholder("write a quantity").fill("5");
   await page.getByRole("button", { name: "Update Product" }).click();
 
+  await expect(page).toHaveURL(
+    "http://localhost:3000/dashboard/admin/products"
+  );
   await expect(page.getByText("All Products List")).toBeVisible();
   await expect(
     page.locator("h5").filter({ hasText: /^Crucible: the Novel$/ })
@@ -180,6 +197,10 @@ test("create update and delete category and product UI test", async ({
 
   // Go to Create Category tab
   await createCategoryTab.click();
+
+  await expect(page).toHaveURL(
+    "http://localhost:3000/dashboard/admin/create-category"
+  );
 
   const deleteButton = page.getByRole("button", { name: "Delete" });
   await deleteButton.click();

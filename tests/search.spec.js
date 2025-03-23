@@ -107,7 +107,7 @@ test.describe("Search for a Productt", () => {
     await expect(heading).toBeVisible();
   });
 
-  test("should display Productts that exist for search query", async ({ page }) => {
+  test("should display Products that exist for search query", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: 'Search' });
     await searchBar.click();
     await searchBar.fill('book');
@@ -155,7 +155,7 @@ test.describe("Search for a Productt", () => {
     // });
   });
 
-  test("should display message when Productts don't exist for search query", async ({ page }) => {
+  test("should display message when Products don't exist for search query", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: "Search" });
 
     await searchBar.click();
@@ -164,13 +164,13 @@ test.describe("Search for a Productt", () => {
     await page.waitForURL("http://localhost:3000/search");
 
     const heading = page.getByRole("heading", { name: "Search Results" });
-    const message = page.getByText("No Productts Found");
+    const message = page.getByText("No Products Found");
 
     await expect(heading).toBeVisible();
     await expect(message).toBeVisible();
   });
 
-  test("should navigate to Productt page when 'More Details' button is clicked", async ({ page }) => {
+  test("should navigate to Product page when 'More Details' button is clicked", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: 'Search' });
 
     await searchBar.click();
@@ -182,14 +182,14 @@ test.describe("Search for a Productt", () => {
 
     await expect(button).toBeVisible();
     await button.click();
-    await page.waitForURL(`http://localhost:3000/Productt/${ mockSearchResults[0].slug }`);
+    await page.waitForURL(`http://localhost:3000/product/${ mockSearchResults[0].slug }`);
 
-    await expect(page.getByRole('heading', { name: 'Productt Details' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Product Details' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Name: Textbook' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Description: A comprehensive' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Price: $79.99' })).toBeVisible();
     await expect(page.getByTestId('pd-image-Textbook')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Similar Productts ➡️' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Similar Products ➡️' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'ADD TO CART' })).toBeVisible();
   });
 });

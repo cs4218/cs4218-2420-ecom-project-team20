@@ -11,6 +11,7 @@
     "dev:test": "concurrently \"npm run start\" \"npm run client\"",
     "sonarqube": "sonarqube-scanner",
     "test:ui": "node scripts/run-ui-tests.js",
+    "test:ui-docker": "node scripts/run-ui-tests-docker.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --silent",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js --detectOpenHandles"

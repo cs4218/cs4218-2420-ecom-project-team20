@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 let containerId;
 const MONGODB_PORT = 27017;
 
-export async function startMongoDB() {
+export async function startMongoMemoryServer() {
   try {
     const containerName = `mongodb-test-${randomUUID()}`;
     
@@ -54,7 +54,7 @@ export async function startMongoDB() {
 }
 
 
-export async function stopMongoDB() {
+export async function stopMongoMemoryServer() {
   if (containerId) {
     try {
       console.log(`Stopping MongoDB Docker container: ${containerId}`);
