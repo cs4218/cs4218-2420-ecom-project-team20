@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -7,6 +8,7 @@ import ProductModel from "../../../models/productModel";
 import CategoryModel from "../../../models/categoryModel";
 import * as productController from "../../../controllers/productController";
 
+dotenv.config();
 let mongoServer;
 const app = express();
 app.use(express.json());
