@@ -27,11 +27,13 @@ const newUser = {
   role: 0,
 };
 
-const hashedTestPassword = await hashPassword(testUser['password']);
+let hashedTestPassword; ;
 
 test.beforeAll(async () => {
   const uri = await fs.readFile('.mongo-uri', 'utf-8');
   await mongoose.connect(uri);
+
+  hashedTestPassword = await hashPassword(testUser.password);
 
   const user = new userModel(
     {

@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import categoryModel from "../models/categoryModel.js";
 import productModel from "../models/productModel.js";
 import userModel from "../models/userModel.js";
-import { hashPassword } from "../helpers/authHelper";
+import { hashPassword } from "../helpers/authHelper.js";
 import assert from "assert";
 
 let adminName;
