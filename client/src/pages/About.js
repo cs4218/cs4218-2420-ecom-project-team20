@@ -13,8 +13,11 @@ const About = () => {
           />
         </div>
         <div className="col-md-4">
+          <p className="mt-2">
+            Virtual Vault is an ecommerce application for anyone and everyone to use.
+          </p>
           <p className="text-justify mt-2">
-            Add text
+            Buy something today!
           </p>
         </div>
       </div>

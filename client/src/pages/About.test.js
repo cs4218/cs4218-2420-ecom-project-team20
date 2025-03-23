@@ -57,7 +57,7 @@ describe("About page", () => {
             <Route path="/about" element={<About />} />
             </Routes>
         </MemoryRouter>);
-        expect(screen.getByText("Add text")).toBeInTheDocument();
+        expect(screen.getByText("Buy something today!")).toBeInTheDocument();
     });
     
 });
