@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 
 import fs from 'fs/promises';
 import mongoose from "mongoose";
-import categoryModel from '../models/categoryModel.js';
-import productModel from '../models/productModel.js';
+import CategoryModel from '../models/categoryModel.js';
+import ProductModel from '../models/productModel.js';
 
 const mockSearchResults = [
   {
@@ -41,9 +41,9 @@ test.beforeAll(async () => {
   const uri = await fs.readFile('.mongo-uri', 'utf-8');
   await mongoose.connect(uri);
 
-  const searchResult1 = new productModel(mockSearchResults[0]);
-  const searchResult2 = new productModel(mockSearchResults[1]);
-  const bookCategory = new categoryModel({
+  const searchResult1 = new ProducModel(mockSearchResults[0]);
+  const searchResult2 = new ProducModel(mockSearchResults[1]);
+  const bookCategory = new CategoryModel({
     name: "book",
     slug: "book",
     _id: "67daefb0e430f9c760210709",
@@ -58,9 +58,9 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   await Promise.all([
-    productModel.deleteOne({ slug: "textbook" }),
-    productModel.deleteOne({ slug: "the-law-of-contract-in-singapore" }),
-    categoryModel.deleteOne({ slug: "book" }),
+    ProductModel.deleteOne({ slug: "textbook" }),
+    ProductModel.deleteOne({ slug: "the-law-of-contract-in-singapore" }),
+    CategoryModel.deleteOne({ slug: "book" }),
   ]);
   await mongoose.disconnect();
 });
