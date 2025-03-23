@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import mongoose from "mongoose";
-import fs from 'fs/promises';
+import fs from "fs/promises";
 import dotenv from "dotenv";
 import { hashPassword } from "../helpers/authHelper";
 import UserModel from "../models/userModel";
@@ -19,10 +19,12 @@ async function deleteUser(email) {
   }
 }
 
-test.beforeEach(async ({ page }) => {
-  const uri = await fs.readFile('.mongo-uri', 'utf-8');
-  
+test.beforeAll(async () => {
+  const uri = await fs.readFile(".mongo-uri", "utf-8");
   await mongoose.connect(uri);
+});
+
+test.beforeEach(async ({ page }) => {
   await deleteUser(adminEmail);
 
   // create admin user
@@ -46,6 +48,9 @@ test.beforeEach(async ({ page }) => {
 
 test.afterEach(async () => {
   await deleteUser(adminEmail);
+});
+
+test.afterAll(async () => {
   await mongoose.disconnect();
 });
 

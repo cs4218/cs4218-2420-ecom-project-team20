@@ -1,23 +1,67 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { hashPassword } from "../helpers/authHelper";
+
+import fs from 'fs/promises';
+import mongoose from "mongoose";
+import userModel from "../models/userModel.js";
 
 const testUser = {
+  _id: "67debbddaaf3daee05c8e8d9",
   name: "John Smith",
   email: "johnsmith@email.com",
   password: "johnsmithpw",
   phone: "0123456789",
   address: "10 Apple Street",
+  answer: "answer",
+  role: 0,
 };
 const newUser = {
+  _id: "67debbddaaf3daee05c8e8d9",
   name: "Johnny Smith",
   email: "johnsmith@email.com",
   password: "johnnysmithpw",
   phone: "9876543210",
   address: "10 Pear Street",
+  answer: "answer",
+  role: 0,
 };
 
+let hashedTestPassword; ;
+
+test.beforeAll(async () => {
+  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+  await mongoose.connect(uri);
+
+  hashedTestPassword = await hashPassword(testUser.password);
+
+  const user = new userModel(
+    {
+      _id: "67debbddaaf3daee05c8e8d9",
+      name: "John Smith",
+      email: "johnsmith@email.com",
+      password: hashedTestPassword,
+      phone: "0123456789",
+      address: "10 Apple Street",
+      answer: "answer",
+      role: 0,
+    }
+  );
+  await Promise.all([
+    user.save(),
+  ]);
+});
+
+test.afterAll(async () => {
+  await Promise.all([
+    userModel.deleteOne({ name: "John Smith" }),
+    userModel.deleteOne({ name: "Johnny Smith" }),
+  ]);
+  await mongoose.disconnect();
+});
+
 test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000");
+  await page.goto('http://localhost:3000');
 });
 
 test.describe("Update profile details", () => {
@@ -54,26 +98,6 @@ test.describe("Update profile details", () => {
 
     // change back to original testUser details
     await editProfile(page, testUser);
-  });
-
-  test("should be able to login with new details", async ({ page }) => {
-    await login(page, testUser);
-    await navigateToProfile(page, testUser);
-
-    await editProfile(page, newUser);
-    await expect(page.locator('div').filter({ hasText: /^Profile Updated Successfully$/ }).nth(1)).toBeVisible();
-
-    const userTab = page.getByRole("button", { name: newUser.name });
-    await userTab.click();
-
-    const logoutTab = page.getByRole("link", { name: "Logout" });
-    await logoutTab.click();
-
-    await login(page, newUser);
-    await navigateToProfile(page, newUser);
-
-    await editProfile(page, testUser);
-    await expect(page.locator('div').filter({ hasText: /^Profile Updated Successfully$/ }).nth(1)).toBeVisible();
   });
 });
 

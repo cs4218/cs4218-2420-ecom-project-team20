@@ -1,9 +1,8 @@
 import { test, expect } from "@playwright/test";
 import mongoose from "mongoose";
-import fs from 'fs/promises';
+import fs from "fs/promises";
 import { hashPassword } from "../helpers/authHelper.js";
 import UserModel from "../models/userModel.js";
-
 
 let testUserEmail;
 let testUserPassword;
@@ -17,10 +16,12 @@ async function deleteUser(email) {
   }
 }
 
-test.beforeEach(async ({ page }) => {
-  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+test.beforeAll(async () => {
+  const uri = await fs.readFile(".mongo-uri", "utf-8");
   await mongoose.connect(uri);
+});
 
+test.beforeEach(async ({ page }) => {
   testUserEmail = "johndoe@test.com";
   await deleteUser(testUserEmail);
   testUserPassword = "johndoe@test.com";
@@ -47,6 +48,9 @@ test.beforeEach(async ({ page }) => {
 
 test.afterEach(async () => {
   await deleteUser(testUserEmail);
+});
+
+test.afterAll(async () => {
   await mongoose.disconnect();
 });
 

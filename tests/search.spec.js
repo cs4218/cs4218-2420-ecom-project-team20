@@ -1,34 +1,75 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
+import fs from 'fs/promises';
+import mongoose from "mongoose";
+import CategoryModel from '../models/categoryModel.js';
+import ProductModel from '../models/ProductModel.js';
+
 const mockSearchResults = [
   {
-    _id: 1,
+    _id: "66db427fdb0119d9234b27f1",
     name: "Textbook",
     slug: "textbook",
     description: "A comprehensive textbook",
     price: 79.99,
-    category: "book",
+    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
     quantity: 50,
+    photo: {
+      data: Buffer.from('book image placeholder', 'utf-8'),
+      contentType: 'image/png',
+    },
     shipping: false,
   },
   {
-    _id: 2,
+    _id: "67a2171ea6d9e00ef2ac0229",
     name: "The Law of Contract in Singapore",
     slug: "the-law-of-contract-in-singapore",
     description: "A bestselling book in Singapore",
     price: 54.99,
-    category: "book",
+    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
     quantity: 200,
+    photo: {
+      data: Buffer.from('book image placeholder', 'utf-8'),
+      contentType: 'image/png',
+    },
     shipping: true,
   },
 ];
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000");
+test.beforeAll(async () => {
+  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+  await mongoose.connect(uri);
+
+  const searchResult1 = new ProductModel(mockSearchResults[0]);
+  const searchResult2 = new ProductModel(mockSearchResults[1]);
+  const bookCategory = new CategoryModel({
+    name: "book",
+    slug: "book",
+    _id: "67daefb0e430f9c760210709",
+  });
+
+  await Promise.all([
+    searchResult1.save(),
+    searchResult2.save(),
+    bookCategory.save(),
+  ]);
 });
 
-test.describe("Search for a product", () => {
+test.afterAll(async () => {
+  await Promise.all([
+    ProductModel.deleteOne({ slug: "textbook" }),
+    ProductModel.deleteOne({ slug: "the-law-of-contract-in-singapore" }),
+    CategoryModel.deleteOne({ slug: "book" }),
+  ]);
+  await mongoose.disconnect();
+});
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('http://localhost:3000/');
+});
+
+test.describe("Search for a Productt", () => {
   test("should initially have an empty search bar", async ({ page }) => {
     const searchBar = await page.getByRole("searchbox", { name: 'Search' });
     await expect(searchBar).toBeVisible();
@@ -66,9 +107,8 @@ test.describe("Search for a product", () => {
     await expect(heading).toBeVisible();
   });
 
-  test("should display products that exist for search query", async ({ page }) => {
+  test("should display Productts that exist for search query", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: 'Search' });
-
     await searchBar.click();
     await searchBar.fill('book');
     await searchBar.press('Enter');
@@ -115,7 +155,7 @@ test.describe("Search for a product", () => {
     // });
   });
 
-  test("should display message when products don't exist for search query", async ({ page }) => {
+  test("should display message when Productts don't exist for search query", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: "Search" });
 
     await searchBar.click();
@@ -124,13 +164,13 @@ test.describe("Search for a product", () => {
     await page.waitForURL("http://localhost:3000/search");
 
     const heading = page.getByRole("heading", { name: "Search Results" });
-    const message = page.getByText("No Products Found");
+    const message = page.getByText("No Productts Found");
 
     await expect(heading).toBeVisible();
     await expect(message).toBeVisible();
   });
 
-  test("should navigate to product page when 'More Details' button is clicked", async ({ page }) => {
+  test("should navigate to Productt page when 'More Details' button is clicked", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: 'Search' });
 
     await searchBar.click();
@@ -142,14 +182,14 @@ test.describe("Search for a product", () => {
 
     await expect(button).toBeVisible();
     await button.click();
-    await page.waitForURL(`http://localhost:3000/product/${ mockSearchResults[0].slug }`);
+    await page.waitForURL(`http://localhost:3000/Productt/${ mockSearchResults[0].slug }`);
 
-    await expect(page.getByRole('heading', { name: 'Product Details' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Productt Details' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Name: Textbook' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Description: A comprehensive' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Price: $79.99' })).toBeVisible();
     await expect(page.getByTestId('pd-image-Textbook')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Similar Products ➡️' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Similar Productts ➡️' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'ADD TO CART' })).toBeVisible();
   });
 });
