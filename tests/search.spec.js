@@ -1,31 +1,72 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
+import fs from 'fs/promises';
+import mongoose from "mongoose";
+import categoryModel from '../models/categoryModel.js';
+import productModel from '../models/productModel.js';
+
 const mockSearchResults = [
   {
-    _id: 1,
+    _id: "66db427fdb0119d9234b27f1",
     name: "Textbook",
     slug: "textbook",
     description: "A comprehensive textbook",
     price: 79.99,
-    category: "book",
+    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
     quantity: 50,
+    photo: {
+      data: Buffer.from('book image placeholder', 'utf-8'),
+      contentType: 'image/png',
+    },
     shipping: false,
   },
   {
-    _id: 2,
+    _id: "67a2171ea6d9e00ef2ac0229",
     name: "The Law of Contract in Singapore",
     slug: "the-law-of-contract-in-singapore",
     description: "A bestselling book in Singapore",
     price: 54.99,
-    category: "book",
+    category: new mongoose.Types.ObjectId("67daefb0e430f9c760210709"),
     quantity: 200,
+    photo: {
+      data: Buffer.from('book image placeholder', 'utf-8'),
+      contentType: 'image/png',
+    },
     shipping: true,
   },
 ];
 
+test.beforeAll(async () => {
+  const uri = await fs.readFile('.mongo-uri', 'utf-8');
+  await mongoose.connect(uri);
+
+  const searchResult1 = new productModel(mockSearchResults[0]);
+  const searchResult2 = new productModel(mockSearchResults[1]);
+  const bookCategory = new categoryModel({
+    name: "book",
+    slug: "book",
+    _id: "67daefb0e430f9c760210709",
+  });
+
+  await Promise.all([
+    searchResult1.save(),
+    searchResult2.save(),
+    bookCategory.save(),
+  ]);
+});
+
+test.afterAll(async () => {
+  await Promise.all([
+    productModel.deleteOne({ slug: "textbook" }),
+    productModel.deleteOne({ slug: "the-law-of-contract-in-singapore" }),
+    categoryModel.deleteOne({ slug: "book" }),
+  ]);
+  await mongoose.disconnect();
+});
+
 test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000");
+  await page.goto('http://localhost:3000/');
 });
 
 test.describe("Search for a product", () => {
@@ -68,7 +109,6 @@ test.describe("Search for a product", () => {
 
   test("should display products that exist for search query", async ({ page }) => {
     const searchBar = page.getByRole("searchbox", { name: 'Search' });
-
     await searchBar.click();
     await searchBar.fill('book');
     await searchBar.press('Enter');
