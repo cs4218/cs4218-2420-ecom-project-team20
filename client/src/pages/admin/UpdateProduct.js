@@ -16,7 +16,7 @@ const UpdateProduct = () => {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [shipping, setShipping] = useState("");
+  const [shipping, setShipping] = useState(0);
   const [photo, setPhoto] = useState("");
   const [id, setId] = useState("");
 
@@ -89,8 +89,8 @@ const UpdateProduct = () => {
   //delete a product
   const handleDelete = async () => {
     try {
-      let answer = window.prompt("Are You Sure want to delete this product ? ");
-      if (!answer) return;
+      let answer = window.prompt("Are You Sure want to delete this product ? (Yes/No)");
+      if (!answer || answer.toLowerCase() !== "yes") return;
       const { data } = await axios.delete(
         `/api/v1/product/delete-product/${id}`
       );
@@ -223,7 +223,7 @@ const UpdateProduct = () => {
                   onChange={(value) => {
                     setShipping(value);
                   }}
-                  value={shipping ? "yes" : "No"}
+                  value={shipping === 1 ? "Yes" : "No"}
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>

@@ -79,7 +79,7 @@ describe("UpdateProduct Component", () => {
     const img = screen.getByAltText("product_photo");
     expect(img).toHaveAttribute("src", "/api/v1/product/product-photo/123");
 
-    const shippingOption = await screen.findByText("yes");
+    const shippingOption = await screen.findByText("Yes");
     expect(shippingOption).toBeInTheDocument();
 
     const categoryOption = await screen.findByText("Test Category");
