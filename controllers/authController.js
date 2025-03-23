@@ -280,7 +280,6 @@ export const orderStatusController = async (req, res) => {
 
 export const getAllUsersController = async (req, res) => {
   try {
-    console.log("get all users");
     const users = await userModel.find({}).select("-password");
     res.status(200).json({
       success: true,
