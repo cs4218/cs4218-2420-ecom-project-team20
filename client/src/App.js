@@ -24,6 +24,7 @@ import CategoryProduct from "./pages/CategoryProduct";
 import CartPage from "./pages/CartPage";
 import AdminOrders from "./pages/admin/AdminOrders";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
+
 function App() {
   return (
     <>
