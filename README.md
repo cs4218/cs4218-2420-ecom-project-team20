@@ -105,6 +105,8 @@ npm run test:backend
 
 ### End-to-End Testing with Playwright
 
+All the Playwright Tests are under `/tests/` folder 
+
 The project includes Playwright for end-to-end testing, which can be run using below commands - 
 
 If you have Docker installed and running (Recommended):- 

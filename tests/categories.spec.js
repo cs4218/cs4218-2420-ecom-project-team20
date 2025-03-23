@@ -57,7 +57,6 @@ test.describe("Categories Page UI Tests", () => {
         const categoryLinks = page.locator(".btn.btn-primary");
     
         const count = await categoryLinks.count();
-        console.log(`Found ${count} category links`);
 
         await expect(count).toBeGreaterThan(0);
         await expect(categoryLinks.first()).toBeVisible();

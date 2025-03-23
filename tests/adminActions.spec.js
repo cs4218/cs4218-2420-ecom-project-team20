@@ -15,12 +15,11 @@ let adminPassword;
 let adminPhone;
 let adminUser;
 
-test.beforeEach(async () => {
+test.beforeAll(async () => {
   const uri = await fs.readFile(".mongo-uri", "utf-8");
 
   await mongoose.connect(uri);
 
-  // Create Admin User
   adminName = "JRM-NUS";
   adminEmail = "JRAdmin@test.sg";
   adminPassword = "JRAdmin@test.sg";
@@ -40,7 +39,7 @@ test.beforeEach(async () => {
   await newAdminUser.save();
 });
 
-test.afterEach(async () => {
+test.afterAll(async () => {
   await productModel.deleteMany({ name: "Crucible: the Novel" });
   await categoryModel.deleteMany({ name: "Test-Category" });
   await productModel.deleteMany({ name: "Crucible" });
@@ -168,9 +167,12 @@ test("create update and delete category and product UI test", async ({
   await page.getByPlaceholder("write a quantity").fill("5");
   await page.getByRole("button", { name: "Update Product" }).click();
 
+  await page.waitForTimeout(3000);
+
   await expect(page).toHaveURL(
     "http://localhost:3000/dashboard/admin/products"
   );
+
   await expect(page.getByText("All Products List")).toBeVisible();
   await expect(
     page.locator("h5").filter({ hasText: /^Crucible: the Novel$/ })
