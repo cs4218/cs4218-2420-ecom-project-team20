@@ -67,7 +67,7 @@ describe("ProductDetails Integration Tests", () => {
   });
 
   describe("get product details", () => {
-    it("should return 200 and the product", async () => {
+    it("should return 200 and the existing product", async () => {
       const response = await request(app).get(`/api/v1/product/get-product/${ mockProduct.slug }`);
 
       expect(response.status).toBe(200);
@@ -75,10 +75,18 @@ describe("ProductDetails Integration Tests", () => {
       expect(response.body.message).toBe("Single Product Fetched");
       expect(response.body.product.name).toBe(mockProduct.name);
     });
+
+    it("should return 404 when the product doesn't exist", async () => {
+      const response = await request(app).get("/api/v1/product/get-product/non-existent");
+
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe("Product not found");
+    });
   });
 
   describe("get similar product details", () => {
-    it("should return 200 and the product", async () => {
+    it("should return 200 and the similar product", async () => {
       const response = await request(app)
         .get(`/api/v1/product/related-product/${ mockProduct._id }/${ mockCategory._id }`);
 
